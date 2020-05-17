@@ -61,8 +61,40 @@ func openInvoiceDialog(softInvoice *SoftInvoice) {
 	//window.SetKeepAbove(true)
 	//softInvoice.application.AddWindow(window)
 
-	invoices := softInvoice.database.GetAllInvoices()
-	fmt.Println(invoices[1].CustomerName)
+	invoices, err := softInvoice.database.GetAllInvoices()
+	softErrorCheck(err)
+	fmt.Println(invoices[10].CustomerName)
+	fmt.Println(invoices[10].rows[0].Price)
+
+	invoice, err := softInvoice.database.GetInvoiceByNumber("1245")
+	softErrorCheck(err)
+	fmt.Println(invoice.CustomerName)
+	fmt.Println(invoice.rows[0].Price)
+
+	customers, err := softInvoice.database.GetAllCustomers()
+	softErrorCheck(err)
+	fmt.Println(customers[1].FancyName)
+
+	customer, err := softInvoice.database.GetCustomerByNumber("1021")
+	softErrorCheck(err)
+	fmt.Println(customer.FancyName)
+
+	// Should fail
+	_, err = softInvoice.database.GetCustomerByNumber("1234")
+	softErrorCheck(err)
+
+
+	products, err := softInvoice.database.GetAllProducts()
+	softErrorCheck(err)
+	fmt.Println(products[1].Name)
+
+	product, err := softInvoice.database.GetProductByNumber("NOVA")
+	softErrorCheck(err)
+	fmt.Println(product.Name)
+
+	// Should fail
+	_, err = softInvoice.database.GetProductByNumber("FAIL")
+	softErrorCheck(err)
 
 	//button, err := softInvoice.helper.GetButton("cancel_button")
 	//errorCheck(err)
@@ -75,6 +107,12 @@ func openInvoiceDialog(softInvoice *SoftInvoice) {
 func errorCheck(err error) {
 	if err!=nil {
 		panic(err)
+	}
+}
+
+func softErrorCheck(err error) {
+	if err!=nil {
+		fmt.Println(err.Error())
 	}
 }
 
