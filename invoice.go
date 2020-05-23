@@ -6,22 +6,26 @@ import (
 )
 
 type Invoice struct {
-	Id                    int           `db:"id"`
-	Number                int           `db:"number"`
-	Date                  time.Time     `db:"date"`
-	DueDate               time.Time     `db:"duedate"`
-	Amount                float32       `db:"amount"`
-	CustomerId            int           `db:"customerid"`
-	CustomerNumber        string        `db:"customernumber"`
-	CustomerName          string        `db:"customername"`
-	CustomerAddress       string        `db:"customeraddress"`
-	CustomerPostalAddress string        `db:"customerpostaladdress"`
-	CustomerReference     string        `db:"customerreference"`
-	PayDay                int           `db:"payday"`
-	Credit                bool          `db:"credit"`
-	CreditInvoiceNumber   sql.NullInt32 `db:"creditinvoicenumber"`
+	Id                    int           `gorm:"column:id;primary_key"`
+	Number                int           `gorm:"column:number"`
+	Date                  time.Time     `gorm:"column:date"`
+	DueDate               time.Time     `gorm:"column:duedate"`
+	Amount                float32       `gorm:"column:amount"`
+	CustomerId            int           `gorm:"column:customerid"`
+	CustomerNumber        string        `gorm:"column:customernumber;size:100"`
+	CustomerName          string        `gorm:"column:customername;size:100"`
+	CustomerAddress       string        `gorm:"column:customeraddress;size:100"`
+	CustomerPostalAddress string        `gorm:"column:customerpostaladdress;size:100"`
+	CustomerReference     string        `gorm:"column:customerreference;size:100"`
+	PayDay                int           `gorm:"column:payday"`
+	Credit                bool          `gorm:"column:credit;default:0"`
+	CreditInvoiceNumber   sql.NullInt32 `gorm:"column:creditinvoicenumber;default:null"`
 
-	rows []InvoiceRow
+	rows []InvoiceRow `gorm:"foreignkey:id"`
+}
+
+func (p *Invoice) TableName() string {
+	return "invoice"
 }
 
 func (i *Invoice) AddInvoiceRow(invoiceId int, product *Product, amount float32) *InvoiceRow {
