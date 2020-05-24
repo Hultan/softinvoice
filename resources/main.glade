@@ -211,41 +211,89 @@
               </packing>
             </child>
             <child>
-              <object class="GtkTreeView">
+              <object class="GtkScrolledWindow">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <property name="model">invoice_liststore</property>
-                <property name="enable_grid_lines">both</property>
-                <child internal-child="selection">
-                  <object class="GtkTreeSelection"/>
-                </child>
+                <property name="shadow_type">in</property>
+                <property name="min_content_height">400</property>
+                <property name="max_content_height">500</property>
                 <child>
-                  <object class="GtkTreeViewColumn" id="invoicenumber_column">
-                    <property name="fixed_width">50</property>
-                    <property name="title" translatable="yes">Nummer</property>
-                  </object>
-                </child>
-                <child>
-                  <object class="GtkTreeViewColumn" id="invoicedate_column">
-                    <property name="fixed_width">70</property>
-                    <property name="title" translatable="yes">Datum</property>
-                  </object>
-                </child>
-                <child>
-                  <object class="GtkTreeViewColumn" id="duedate_column">
-                    <property name="fixed_width">70</property>
-                    <property name="title" translatable="yes">Förfallodatum</property>
-                  </object>
-                </child>
-                <child>
-                  <object class="GtkTreeViewColumn" id="customer_column">
-                    <property name="title" translatable="yes">Kund</property>
-                  </object>
-                </child>
-                <child>
-                  <object class="GtkTreeViewColumn" id="amount_column">
-                    <property name="fixed_width">70</property>
-                    <property name="title" translatable="yes">Belopp</property>
+                  <object class="GtkTreeView" id="invoice_treeview">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="margin_left">13</property>
+                    <property name="margin_right">13</property>
+                    <property name="model">invoice_liststore</property>
+                    <property name="enable_grid_lines">both</property>
+                    <child internal-child="selection">
+                      <object class="GtkTreeSelection"/>
+                    </child>
+                    <child>
+                      <object class="GtkTreeViewColumn" id="invoicenumber_column">
+                        <property name="sizing">fixed</property>
+                        <property name="fixed_width">70</property>
+                        <property name="title" translatable="yes">Nummer</property>
+                        <child>
+                          <object class="GtkCellRendererText"/>
+                          <attributes>
+                            <attribute name="text">0</attribute>
+                          </attributes>
+                        </child>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkTreeViewColumn" id="invoicedate_column">
+                        <property name="sizing">fixed</property>
+                        <property name="fixed_width">100</property>
+                        <property name="title" translatable="yes">Datum</property>
+                        <child>
+                          <object class="GtkCellRendererText"/>
+                          <attributes>
+                            <attribute name="text">1</attribute>
+                          </attributes>
+                        </child>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkTreeViewColumn" id="duedate_column">
+                        <property name="sizing">fixed</property>
+                        <property name="fixed_width">100</property>
+                        <property name="title" translatable="yes">Förfallodatum</property>
+                        <child>
+                          <object class="GtkCellRendererText"/>
+                          <attributes>
+                            <attribute name="text">2</attribute>
+                          </attributes>
+                        </child>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkTreeViewColumn" id="customer_column">
+                        <property name="sizing">autosize</property>
+                        <property name="title" translatable="yes">Kund</property>
+                        <property name="expand">True</property>
+                        <child>
+                          <object class="GtkCellRendererText"/>
+                          <attributes>
+                            <attribute name="text">3</attribute>
+                          </attributes>
+                        </child>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkTreeViewColumn" id="amount_column">
+                        <property name="sizing">fixed</property>
+                        <property name="fixed_width">100</property>
+                        <property name="title" translatable="yes">Belopp</property>
+                        <child>
+                          <object class="GtkCellRendererText"/>
+                          <attributes>
+                            <attribute name="foreground">5</attribute>
+                            <attribute name="text">4</attribute>
+                          </attributes>
+                        </child>
+                      </object>
+                    </child>
                   </object>
                 </child>
               </object>
@@ -731,6 +779,19 @@
             <property name="position">4</property>
           </packing>
         </child>
+      </object>
+    </child>
+    <child type="titlebar">
+      <placeholder/>
+    </child>
+  </object>
+  <object class="GtkWindow" id="preview_window">
+    <property name="can_focus">False</property>
+    <child>
+      <object class="GtkImage" id="invoice_preview">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="stock">gtk-missing-image</property>
       </object>
     </child>
     <child type="titlebar">

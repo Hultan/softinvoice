@@ -16,6 +16,7 @@ const ApplicationFlags glib.ApplicationFlags = glib.APPLICATION_FLAGS_NONE
 type SoftInvoice struct {
 	application   *gtk.Application
 	invoiceWindow *gtk.Window
+	previewWindow *gtk.Window
 	helper        *gtkhelper.GtkHelper
 	database      *database
 }
@@ -27,9 +28,10 @@ func main() {
 
 	// Create the SoftInvoice application object
 	softInvoice := NewSoftInvoice(app)
+	mainWindow := NewMainWindow()
 
 	// Hook up the activate event handler
-	app.Connect("activate", activate, softInvoice)
+	app.Connect("activate", mainWindow.OpenMainWindow, softInvoice)
 
 	// Start the application
 	status := app.Run(os.Args)
@@ -38,83 +40,19 @@ func main() {
 	os.Exit(status)
 }
 
-func activate(app *gtk.Application, softInvoice *SoftInvoice) {
-	// Initialize gtk
-	gtk.Init(&os.Args)
-
-	// Create a new gtk helper
-	softInvoice.helper = gtkhelper.GtkHelperNewFromFile("resources/main.glade")
-	// Get the main window from the glade file
-	mainWindow, err := softInvoice.helper.GetApplicationWindow("main_window")
-	errorCheck(err)
-
-	// Set up main window
-	mainWindow.SetApplication(app)
-	mainWindow.SetTitle("Window")
-	mainWindow.SetDefaultSize(800, 600)
-
-	// Hook up the destroy event
-	mainWindow.Connect("destroy", func() {
-		closeApplication(softInvoice)
-	})
-
-	// Get the new invoice button
-	button, err := softInvoice.helper.GetToolButton("newinvoice_button")
-	errorCheck(err)
-
-	// Hook up the clicked event for the new invoice button
-	button.Connect("clicked", func() {
-		openInvoiceDialog(softInvoice)
-	})
-
-	// Show the main window
-	mainWindow.ShowAll()
+func createInvoice() {
+	invoice := new(Invoice)
+	creator := NewInvoiceCreator(invoice)
+	image := creator.CreatePNG()
+	image.SavePNG("/home/per/temp/test.png",0)
 }
 
-func closeApplication(softInvoice *SoftInvoice) {
-	// Destroy the invoice window if it has been created
-	if softInvoice.invoiceWindow != nil {
-		softInvoice.invoiceWindow.Destroy()
-	}
-	// Close the database
-	softInvoice.database.CloseDatabase()
-}
-
-func openInvoiceDialog(softInvoice *SoftInvoice) {
-	// Check if it is the first time we open the invoice window
-	if softInvoice.invoiceWindow==nil {
-		// Get the invoice window from glade
-		window, err := softInvoice.helper.GetWindow("invoice_window")
-		errorCheck(err)
-
-		// Save a pointer to the invoice window
-		softInvoice.invoiceWindow = window
-
-		// Set up the invoice window
-		window.SetApplication(softInvoice.application)
-		window.HideOnDelete()
-		window.SetModal(true)
-		window.SetKeepAbove(true)
-
-		// Hook up the hide event
-		window.Connect("hide", func() {
-		})
-
-		// Get the cancel button
-		button, err := softInvoice.helper.GetButton("cancel_button")
-		errorCheck(err)
-
-		// Hook up the clicked event for the cancel button
-		button.Connect("clicked", func() {
-			window.Hide()
-		})
-
-		// Show the window
-		window.ShowAll()
-	} else {
-		// Show the window
-		softInvoice.invoiceWindow.ShowAll()
-	}
+// Create a new SoftInvoice object
+func NewSoftInvoice(app *gtk.Application) *SoftInvoice {
+	softInvoice := new(SoftInvoice)
+	softInvoice.database = new(database)
+	softInvoice.application = app
+	return softInvoice
 }
 
 func errorCheck(err error) {
@@ -127,14 +65,6 @@ func softErrorCheck(err error) {
 	if err != nil {
 		fmt.Println(err.Error())
 	}
-}
-
-// Create a new SoftInvoice object
-func NewSoftInvoice(app *gtk.Application) *SoftInvoice {
-	softInvoice := new(SoftInvoice)
-	softInvoice.database = new(database)
-	softInvoice.application = app
-	return softInvoice
 }
 
 //

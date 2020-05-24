@@ -31,7 +31,7 @@ func (d *database) GetAllInvoices() ([]Invoice, error) {
 		return nil, err
 	}
 	var invoices []Invoice
-	if result := db.Find(&invoices); result.Error != nil {
+	if result := db.Order("number desc").Find(&invoices); result.Error != nil {
 		return nil, result.Error
 	}
 
