@@ -20,6 +20,7 @@ type Invoice struct {
 	PayDay                int           `gorm:"column:payday"`
 	Credit                bool          `gorm:"column:credit;default:0"`
 	CreditInvoiceNumber   sql.NullInt32 `gorm:"column:creditinvoicenumber;default:null"`
+	ReadOnly              bool          `gorm:"column:readonly;default:false"`
 
 	rows []InvoiceRow `gorm:"foreignkey:id"`
 }

@@ -40,13 +40,6 @@ func main() {
 	os.Exit(status)
 }
 
-func createInvoice() {
-	invoice := new(Invoice)
-	creator := NewInvoiceCreator(invoice)
-	image := creator.CreatePNG()
-	image.SavePNG("/home/per/temp/test.png",0)
-}
-
 // Create a new SoftInvoice object
 func NewSoftInvoice(app *gtk.Application) *SoftInvoice {
 	softInvoice := new(SoftInvoice)

@@ -1,5 +1,7 @@
 package main
 
+import "os"
+
 type PreviewWindow struct {
 
 }
@@ -42,8 +44,11 @@ func (p *PreviewWindow) OpenPreviewWindow(softInvoice *SoftInvoice, invoice *Inv
 		panic(err)
 	}
 	creator := NewInvoiceCreator(invoice)
-	pixbuf := creator.CreatePNG()
+	pixbuf, path := creator.CreatePNG()
 	image.SetFromPixbuf(pixbuf)
+
+	// Clean up image
+	os.Remove(path)
 }
 
 func (p *PreviewWindow) ClosePreviewWindow() {

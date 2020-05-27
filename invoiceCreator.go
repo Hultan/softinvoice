@@ -6,6 +6,7 @@ import (
 	"github.com/gotk3/gotk3/gdk"
 	"github.com/gotk3/gotk3/gtk"
 	"github.com/hultan/softteam/resources"
+	"github.com/jung-kurt/gofpdf"
 	"golang.org/x/text/language"
 	"golang.org/x/text/message"
 	"io/ioutil"
@@ -23,10 +24,24 @@ func NewInvoiceCreator(invoice *Invoice) *InvoiceCreator {
 }
 
 func (i *InvoiceCreator) CreatePDF(path string) {
+	_, imagePath := i.CreatePNG()
 
+	pdf := gofpdf.New("P", "mm", "A4", "")
+	pdf.AddPage()
+	//pdf.SetFont("Arial", "B", 16)
+	//pdf.Cell(40, 10, "Hello world!!!")
+	pdf.Image(imagePath,0,0,200,287,false,"",0,"")
+
+	err := pdf.OutputFileAndClose(path)
+	if err!=nil {
+		panic(err)
+	}
+
+	// Clean up image
+	os.Remove(imagePath)
 }
 
-func (i *InvoiceCreator) CreatePNG() *gdk.Pixbuf {
+func (i *InvoiceCreator) CreatePNG() (*gdk.Pixbuf, string) {
 	// Load the image
 	resource := new(resources.Resources)
 	filePath := resource.GetResourcePath("empty_invoice.png")
@@ -63,13 +78,12 @@ func (i *InvoiceCreator) CreatePNG() *gdk.Pixbuf {
 	file, err := ioutil.TempFile("/tmp","se_softteam_invoice_*.png")
 	surface.WriteToPNG(file.Name())
 	returnImage, err :=gdk.PixbufNewFromFile(file.Name())
-	os.Remove(file.Name())
 
 	// Clean up
 	surface = nil
 	cr = nil
 
-	return returnImage
+	return returnImage, file.Name()
 }
 
 func (i *InvoiceCreator) FillInvoiceTextPNG(cr *cairo.Context) {
@@ -106,12 +120,12 @@ func (i *InvoiceCreator) FillInvoiceTextPNG(cr *cairo.Context) {
 	rounded:=float32(int(sumInclVAT)) - sumInclVAT
 	i.writeTextOnPNG(cr, 15, cairo.FONT_WEIGHT_NORMAL, 710,789 ,p.Sprintf("%.2f",sumExclVAT), true)
 	i.writeTextOnPNG(cr, 15, cairo.FONT_WEIGHT_NORMAL, 710,807 ,p.Sprintf("%.2f",vat), true)
-	i.writeTextOnPNG(cr, 15, cairo.FONT_WEIGHT_BOLD, 710,832 ,p.Sprintf("%.2f",sumInclVAT), true)
+	i.writeTextOnPNG(cr, 15, cairo.FONT_WEIGHT_NORMAL, 710,832 ,p.Sprintf("%.2f",sumInclVAT), true)
 	i.writeTextOnPNG(cr, 15, cairo.FONT_WEIGHT_NORMAL, 710,850 ,p.Sprintf("%.2f",rounded), true)
 
 	i.writeTextOnPNG(cr, 16, cairo.FONT_WEIGHT_NORMAL, 190,883 ,"5689-1849", false)
 	i.writeTextOnPNG(cr, 16, cairo.FONT_WEIGHT_NORMAL, 405,883 ,i.Invoice.DueDate.Format(constDateLayout), false)
-	i.writeTextOnPNG(cr, 16, cairo.FONT_WEIGHT_NORMAL, 710,883 ,p.Sprintf("%.2f",toPay), true)
+	i.writeTextOnPNG(cr, 16, cairo.FONT_WEIGHT_BOLD, 710,883 ,p.Sprintf("%.2f",toPay), true)
 
 }
 

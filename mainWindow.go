@@ -1,5 +1,6 @@
 package main
 
+import "C"
 import (
 	"fmt"
 	"github.com/gotk3/gotk3/glib"
@@ -10,10 +11,13 @@ import (
 )
 
 type MainWindow struct {
-	invoices []Invoice
+	window    *gtk.ApplicationWindow
+	treeView  *gtk.TreeView
+	popupMenu *PopupMenu
+	invoices  []Invoice
 }
 
-func NewMainWindow() *MainWindow{
+func NewMainWindow() *MainWindow {
 	mainWindow := new(MainWindow)
 	return mainWindow
 }
@@ -27,6 +31,8 @@ func (m *MainWindow) OpenMainWindow(app *gtk.Application, softInvoice *SoftInvoi
 	// Get the main window from the glade file
 	mainWindow, err := softInvoice.helper.GetApplicationWindow("main_window")
 	errorCheck(err)
+
+	m.window = mainWindow
 
 	// Set up main window
 	mainWindow.SetApplication(app)
@@ -50,9 +56,11 @@ func (m *MainWindow) OpenMainWindow(app *gtk.Application, softInvoice *SoftInvoi
 	})
 
 	err = m.loadInvoiceList(softInvoice)
-	if err!=nil {
+	if err != nil {
 		// Failed to load invoice list
 	}
+
+	m.popupMenu = NewPopupMenu(softInvoice, m)
 
 	// Show the main window
 	mainWindow.ShowAll()
@@ -73,18 +81,18 @@ func (m *MainWindow) CloseMainWindow(softInvoice *SoftInvoice) {
 	softInvoice.database.CloseDatabase()
 }
 
-func (m *MainWindow) loadInvoiceList(softInvoice *SoftInvoice) error{
+func (m *MainWindow) loadInvoiceList(softInvoice *SoftInvoice) error {
 	invoices, err := softInvoice.database.GetAllInvoices()
-	if err!=nil {
+	if err != nil {
 		return err
 	}
 	m.invoices = invoices
-
 	treeView, err := softInvoice.helper.GetTreeView("invoice_treeview")
-	if err!=nil {
+	if err != nil {
 		// Failed to get invoice treeview
 		return err
 	}
+	m.treeView = treeView
 
 	listStore, err := gtk.ListStoreNew(
 		glib.TYPE_STRING, // Nummer
@@ -94,7 +102,7 @@ func (m *MainWindow) loadInvoiceList(softInvoice *SoftInvoice) error{
 		glib.TYPE_STRING, // Belopp
 		glib.TYPE_STRING) // Background color (credit)
 
-	if err!=nil {
+	if err != nil {
 		// Failed to create list store
 		return err
 	}
@@ -102,12 +110,12 @@ func (m *MainWindow) loadInvoiceList(softInvoice *SoftInvoice) error{
 	for _, invoice := range invoices {
 		iter := listStore.Append()
 		//color:=m.getColor(&invoice)
-		listStore.Set(iter, []int{0,1,2,3,4,5}, []interface{}{
-			fmt.Sprintf("%d",invoice.Number),
+		listStore.Set(iter, []int{0, 1, 2, 3, 4, 5}, []interface{}{
+			fmt.Sprintf("%d", invoice.Number),
 			invoice.Date.Format(constDateLayout),
 			invoice.DueDate.Format(constDateLayout),
 			invoice.CustomerName,
-			fmt.Sprintf("%.2f",invoice.Amount),
+			fmt.Sprintf("%.2f", invoice.Amount),
 			m.getColor(&invoice)})
 	}
 
@@ -124,8 +132,10 @@ func (m *MainWindow) invoiceClicked(treeView *gtk.TreeView, path *gtk.TreePath, 
 		return
 	}
 
-	preview := NewPreviewWindow()
-	preview.OpenPreviewWindow(softInvoice, invoice)
+	//preview := NewPreviewWindow()
+	//preview.OpenPreviewWindow(softInvoice, invoice)
+	creator := NewInvoiceCreator(invoice)
+	creator.CreatePDF("/home/per/temp/test.pdf")
 }
 
 func (m *MainWindow) getSelectedInvoice(treeView *gtk.TreeView) *Invoice {
@@ -147,7 +157,7 @@ func (m *MainWindow) getSelectedInvoice(treeView *gtk.TreeView) *Invoice {
 		if err != nil {
 			return nil
 		}
-		for _,invoice := range m.invoices {
+		for _, invoice := range m.invoices {
 			if invoice.Number == invoiceNumber {
 				return &invoice
 			}
@@ -165,4 +175,3 @@ func (m *MainWindow) getColor(invoice *Invoice) string {
 		return "WHITE"
 	}
 }
-
