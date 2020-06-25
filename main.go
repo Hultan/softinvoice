@@ -5,6 +5,7 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gotk3/gotk3/glib"
 	"github.com/gotk3/gotk3/gtk"
+	database "github.com/hultan/softteam-invoice/database"
 	gtkhelper "github.com/hultan/softteam/gtk"
 	"os"
 )
@@ -18,7 +19,7 @@ type SoftInvoice struct {
 	invoiceWindow *gtk.Window
 	previewWindow *gtk.Window
 	helper        *gtkhelper.GtkHelper
-	database      *database
+	database      *database.Database
 }
 
 func main() {
@@ -43,7 +44,7 @@ func main() {
 // Create a new SoftInvoice object
 func NewSoftInvoice(app *gtk.Application) *SoftInvoice {
 	softInvoice := new(SoftInvoice)
-	softInvoice.database = new(database)
+	softInvoice.database = new(database.Database)
 	softInvoice.application = app
 	return softInvoice
 }

@@ -1,7 +1,11 @@
 package main
 
+import "fmt"
+
 type InvoiceWindow struct {
 }
+
+var isSaving = false
 
 func NewInvoiceWindow() *InvoiceWindow {
 	invoiceWindow := new(InvoiceWindow)
@@ -30,11 +34,21 @@ func (i *InvoiceWindow) OpenInvoiceWindow(softInvoice *SoftInvoice) {
 		})
 
 		// Get the cancel button
-		button, err := softInvoice.helper.GetButton("cancel_button")
+		cancelButton, err := softInvoice.helper.GetButton("cancel_button")
 		errorCheck(err)
 
 		// Hook up the clicked event for the cancel button
-		button.Connect("clicked", func() {
+		cancelButton.Connect("clicked", func() {
+			window.Hide()
+		})
+
+		// Get the save button
+		saveButton, err := softInvoice.helper.GetButton("save_button")
+		errorCheck(err)
+
+		// Hook up the clicked event for the cancel button
+		saveButton.Connect("clicked", func() {
+			isSaving = true
 			window.Hide()
 		})
 
@@ -47,5 +61,12 @@ func (i *InvoiceWindow) OpenInvoiceWindow(softInvoice *SoftInvoice) {
 }
 
 func (i *InvoiceWindow) CloseInvoiceWindow() {
+	if isSaving {
+		isSaving = false
+		i.saveInvoice()
+	}
+}
 
+func (i *InvoiceWindow) saveInvoice() {
+	fmt.Println("SAVE!")
 }

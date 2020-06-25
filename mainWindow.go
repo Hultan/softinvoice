@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/gotk3/gotk3/glib"
 	"github.com/gotk3/gotk3/gtk"
+	"github.com/hultan/softteam-invoice/database"
 	gtkhelper "github.com/hultan/softteam/gtk"
 	"os"
 	"strconv"
@@ -14,7 +15,7 @@ type MainWindow struct {
 	window    *gtk.ApplicationWindow
 	treeView  *gtk.TreeView
 	popupMenu *PopupMenu
-	invoices  []Invoice
+	invoices  []database.Invoice
 }
 
 func NewMainWindow() *MainWindow {
@@ -36,7 +37,8 @@ func (m *MainWindow) OpenMainWindow(app *gtk.Application, softInvoice *SoftInvoi
 
 	// Set up main window
 	mainWindow.SetApplication(app)
-	mainWindow.SetTitle("Window")
+	title := fmt.Sprintf("SoftInvoice - [Database : %s]", database.DatabaseName)
+	mainWindow.SetTitle(title)
 	mainWindow.SetDefaultSize(800, 600)
 
 	// Hook up the destroy event
@@ -50,7 +52,6 @@ func (m *MainWindow) OpenMainWindow(app *gtk.Application, softInvoice *SoftInvoi
 
 	// Hook up the clicked event for the new invoice button
 	button.Connect("clicked", func() {
-		//createInvoice()
 		invoiceWindow := NewInvoiceWindow()
 		invoiceWindow.OpenInvoiceWindow(softInvoice)
 	})
@@ -138,7 +139,7 @@ func (m *MainWindow) invoiceClicked(treeView *gtk.TreeView, path *gtk.TreePath, 
 	creator.CreatePDF("/home/per/temp/test.pdf")
 }
 
-func (m *MainWindow) getSelectedInvoice(treeView *gtk.TreeView) *Invoice {
+func (m *MainWindow) getSelectedInvoice(treeView *gtk.TreeView) *database.Invoice {
 	selection, err := treeView.GetSelection()
 	if err != nil {
 		return nil
@@ -168,7 +169,7 @@ func (m *MainWindow) getSelectedInvoice(treeView *gtk.TreeView) *Invoice {
 	return nil
 }
 
-func (m *MainWindow) getColor(invoice *Invoice) string {
+func (m *MainWindow) getColor(invoice *database.Invoice) string {
 	if invoice.Credit {
 		return "RED"
 	} else {

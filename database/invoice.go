@@ -1,4 +1,4 @@
-package main
+package database
 
 import (
 	"database/sql"
@@ -22,7 +22,7 @@ type Invoice struct {
 	CreditInvoiceNumber   sql.NullInt32 `gorm:"column:creditinvoicenumber;default:null"`
 	ReadOnly              bool          `gorm:"column:readonly;default:false"`
 
-	rows []InvoiceRow `gorm:"foreignkey:id"`
+	Rows []InvoiceRow `gorm:"foreignkey:id"`
 }
 
 func (p *Invoice) TableName() string {
@@ -39,7 +39,7 @@ func (i *Invoice) AddInvoiceRow(invoiceId int, product *Product, amount float32)
 	row.Amount = amount
 	row.Total = amount * product.Price
 
-	i.rows = append(i.rows, *row)
+	i.Rows = append(i.Rows, *row)
 
 	return row
 }

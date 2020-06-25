@@ -1,4 +1,4 @@
-package main
+package database
 
 type Customer struct {
 	Id            int    `gorm:"column:id;primary_key"`

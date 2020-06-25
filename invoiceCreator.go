@@ -5,6 +5,7 @@ import (
 	"github.com/gotk3/gotk3/cairo"
 	"github.com/gotk3/gotk3/gdk"
 	"github.com/gotk3/gotk3/gtk"
+	"github.com/hultan/softteam-invoice/database"
 	"github.com/hultan/softteam/resources"
 	"github.com/jung-kurt/gofpdf"
 	"golang.org/x/text/language"
@@ -14,10 +15,10 @@ import (
 )
 
 type InvoiceCreator struct {
-	Invoice *Invoice
+	Invoice *database.Invoice
 }
 
-func NewInvoiceCreator(invoice *Invoice) *InvoiceCreator {
+func NewInvoiceCreator(invoice *database.Invoice) *InvoiceCreator {
 	creator := new(InvoiceCreator)
 	creator.Invoice = invoice
 	return creator
@@ -103,7 +104,7 @@ func (i *InvoiceCreator) FillInvoiceTextPNG(cr *cairo.Context) {
 	p := message.NewPrinter(language.Swedish)
 	var sumExclVAT float32 = 0.0
 
-	for index, invoiceRow := range i.Invoice.rows {
+	for index, invoiceRow := range i.Invoice.Rows {
 		offset := float64(index) * 50
 		i.writeTextOnPNG(cr, 15, cairo.FONT_WEIGHT_NORMAL, 110,400 + offset,invoiceRow.Text,false)
 		i.writeTextOnPNG(cr, 15, cairo.FONT_WEIGHT_NORMAL, 110,420 + offset,invoiceRow.Name,false)

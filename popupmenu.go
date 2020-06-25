@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/gotk3/gotk3/gdk"
 	"github.com/gotk3/gotk3/gtk"
+	"github.com/hultan/softteam-invoice/database"
 	"strconv"
 )
 
@@ -62,7 +63,7 @@ func NewPopupMenu(softInvoice *SoftInvoice, mainWindow *MainWindow) *PopupMenu {
 	return menu
 }
 
-func (p *PopupMenu) getSelectedInvoice(treeView *gtk.TreeView) *Invoice {
+func (p *PopupMenu) getSelectedInvoice(treeView *gtk.TreeView) *database.Invoice {
 	selection, err := treeView.GetSelection()
 	if err != nil {
 		return nil

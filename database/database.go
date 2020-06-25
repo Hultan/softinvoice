@@ -1,4 +1,4 @@
-package main
+package database
 
 // https://github.com/jmoiron/sqlx	: Querying
 // https://github.com/jmoiron/modl	: Inserts and updates
@@ -6,14 +6,15 @@ package main
 
 import (
 	//	"github.com/jmoiron/sqlx"
+	"fmt"
 	"github.com/jinzhu/gorm"
 )
 
-type database struct {
+type Database struct {
 	db *gorm.DB
 }
 
-func (d *database) UpdateProduct(product *Product) error {
+func (d *Database) UpdateProduct(product *Product) error {
 	db, err := d.getDatabase()
 	if err != nil {
 		return err
@@ -25,7 +26,7 @@ func (d *database) UpdateProduct(product *Product) error {
 	return nil
 }
 
-func (d *database) GetAllInvoices() ([]Invoice, error) {
+func (d *Database) GetAllInvoices() ([]Invoice, error) {
 	db, err := d.getDatabase()
 	if err != nil {
 		return nil, err
@@ -40,13 +41,13 @@ func (d *database) GetAllInvoices() ([]Invoice, error) {
 		if err != nil {
 			return nil, err
 		}
-		invoices[index].rows = rows
+		invoices[index].Rows = rows
 	}
 
 	return invoices, nil
 }
 
-func (d *database) GetInvoiceRowsByInvoiceId(id int) ([]InvoiceRow, error) {
+func (d *Database) GetInvoiceRowsByInvoiceId(id int) ([]InvoiceRow, error) {
 	db, err := d.getDatabase()
 	if err != nil {
 		return nil, err
@@ -59,7 +60,7 @@ func (d *database) GetInvoiceRowsByInvoiceId(id int) ([]InvoiceRow, error) {
 	return invoiceRows, nil
 }
 
-func (d *database) GetInvoiceByNumber(number string) (*Invoice, error) {
+func (d *Database) GetInvoiceByNumber(number string) (*Invoice, error) {
 	db, err := d.getDatabase()
 	if err != nil {
 		return nil, err
@@ -73,12 +74,12 @@ func (d *database) GetInvoiceByNumber(number string) (*Invoice, error) {
 	if err != nil {
 		return nil, err
 	}
-	invoice.rows = rows
+	invoice.Rows = rows
 
 	return &invoice, nil
 }
 
-func (d *database) GetAllCustomers() ([]Customer, error) {
+func (d *Database) GetAllCustomers() ([]Customer, error) {
 	db, err := d.getDatabase()
 	if err != nil {
 		return nil, err
@@ -91,7 +92,7 @@ func (d *database) GetAllCustomers() ([]Customer, error) {
 	return customers, nil
 }
 
-func (d *database) GetCustomerByNumber(number string) (*Customer, error) {
+func (d *Database) GetCustomerByNumber(number string) (*Customer, error) {
 	db, err := d.getDatabase()
 	if err != nil {
 		return nil, err
@@ -104,7 +105,7 @@ func (d *database) GetCustomerByNumber(number string) (*Customer, error) {
 	return &customer, nil
 }
 
-func (d *database) GetAllProducts() ([]Product, error) {
+func (d *Database) GetAllProducts() ([]Product, error) {
 	db, err := d.getDatabase()
 	if err != nil {
 		return nil, err
@@ -117,7 +118,7 @@ func (d *database) GetAllProducts() ([]Product, error) {
 	return products, nil
 }
 
-func (d *database) GetProductByNumber(number string) (*Product, error) {
+func (d *Database) GetProductByNumber(number string) (*Product, error) {
 	db, err := d.getDatabase()
 	if err != nil {
 		return nil, err
@@ -130,9 +131,10 @@ func (d *database) GetProductByNumber(number string) (*Product, error) {
 	return &product, nil
 }
 
-func (d *database) getDatabase() (*gorm.DB, error) {
+func (d *Database) getDatabase() (*gorm.DB, error) {
 	if d.db == nil {
-		db, err := gorm.Open("mysql", "per:KnaskimGjwQ6M!@tcp(192.168.1.3:3306)/softinvoice?parseTime=True")
+		var connectionString = fmt.Sprintf("per:KnaskimGjwQ6M!@tcp(192.168.1.3:3306)/%s?parseTime=True", DatabaseName)
+		db, err := gorm.Open("mysql", connectionString)
 		if err != nil {
 			return nil, err
 		}
@@ -141,7 +143,7 @@ func (d *database) getDatabase() (*gorm.DB, error) {
 	return d.db, nil
 }
 
-func (d *database) CloseDatabase() {
+func (d *Database) CloseDatabase() {
 	if d.db == nil {
 		return
 	}

@@ -1,6 +1,9 @@
 package main
 
-import "os"
+import (
+	"github.com/hultan/softteam-invoice/database"
+	"os"
+)
 
 type PreviewWindow struct {
 
@@ -11,7 +14,7 @@ func NewPreviewWindow() *PreviewWindow {
 	return window
 }
 
-func (p *PreviewWindow) OpenPreviewWindow(softInvoice *SoftInvoice, invoice *Invoice) {
+func (p *PreviewWindow) OpenPreviewWindow(softInvoice *SoftInvoice, invoice *database.Invoice) {
 	// Check if it is the first time we open the preview window
 	if softInvoice.previewWindow==nil {
 		// Get the preview window from glade

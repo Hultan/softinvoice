@@ -1,4 +1,4 @@
-package main
+package database
 
 type InvoiceRow struct {
 	Id        int     `gorm:"column:id;primary_key"`
