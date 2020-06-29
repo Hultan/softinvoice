@@ -8,10 +8,10 @@ import (
 )
 
 type PopupMenu struct {
-	parent *MainWindow
+	parent *MainForm
 }
 
-func NewPopupMenu(softInvoice *SoftInvoice, mainWindow *MainWindow) *PopupMenu {
+func NewPopupMenu(softInvoice *SoftInvoice, mainWindow *MainForm) *PopupMenu {
 	menu := new(PopupMenu)
 
 	menu.parent = mainWindow
@@ -38,7 +38,7 @@ func NewPopupMenu(softInvoice *SoftInvoice, mainWindow *MainWindow) *PopupMenu {
 			return
 		}
 
-		softInvoice.previewWindow.OpenPreviewWindow(softInvoice, invoice)
+		softInvoice.previewWForm.OpenPreviewForm(softInvoice, invoice)
 	})
 
 	pdf.Connect("activate", func() {

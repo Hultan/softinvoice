@@ -131,6 +131,22 @@ func (d *Database) GetProductByNumber(number string) (*Product, error) {
 	return &product, nil
 }
 
+func (d *Database) GetNextInvoiceNumber() (int, error) {
+	db, err := d.getDatabase()
+	if err != nil {
+		return -1, err
+	}
+	var result int
+
+	row:=db.Table("invoice").Select("MAX(number)").Row()
+	err = row.Scan(&result)
+	if err!=nil {
+		return -1, err
+	}
+
+	return result + 1, nil
+}
+
 func (d *Database) getDatabase() (*gorm.DB, error) {
 	if d.db == nil {
 		var connectionString = fmt.Sprintf("per:KnaskimGjwQ6M!@tcp(192.168.1.3:3306)/%s?parseTime=True", DatabaseName)

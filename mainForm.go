@@ -11,38 +11,38 @@ import (
 	"strconv"
 )
 
-type MainWindow struct {
+type MainForm struct {
 	window    *gtk.ApplicationWindow
 	treeView  *gtk.TreeView
 	popupMenu *PopupMenu
 	invoices  []database.Invoice
 }
 
-func NewMainWindow() *MainWindow {
-	mainWindow := new(MainWindow)
-	return mainWindow
+func NewMainForm() *MainForm {
+	mainForm := new(MainForm)
+	return mainForm
 }
 
-func (m *MainWindow) OpenMainWindow(app *gtk.Application, softInvoice *SoftInvoice) {
+func (m *MainForm) OpenMainForm(app *gtk.Application, softInvoice *SoftInvoice) {
 	// Initialize gtk
 	gtk.Init(&os.Args)
 
 	// Create a new gtk helper
 	softInvoice.helper = gtkhelper.GtkHelperNewFromFile("resources/main.glade")
 	// Get the main window from the glade file
-	mainWindow, err := softInvoice.helper.GetApplicationWindow("main_window")
+	window, err := softInvoice.helper.GetApplicationWindow("main_window")
 	errorCheck(err)
 
-	m.window = mainWindow
+	m.window = window
 
 	// Set up main window
-	mainWindow.SetApplication(app)
+	window.SetApplication(app)
 	title := fmt.Sprintf("SoftInvoice - [Database : %s]", database.DatabaseName)
-	mainWindow.SetTitle(title)
-	mainWindow.SetDefaultSize(800, 600)
+	window.SetTitle(title)
+	window.SetDefaultSize(800, 600)
 
 	// Hook up the destroy event
-	mainWindow.Connect("destroy", func() {
+	window.Connect("destroy", func() {
 		m.CloseMainWindow(softInvoice)
 	})
 
@@ -52,7 +52,7 @@ func (m *MainWindow) OpenMainWindow(app *gtk.Application, softInvoice *SoftInvoi
 
 	// Hook up the clicked event for the new invoice button
 	button.Connect("clicked", func() {
-		softInvoice.invoiceWindow.OpenInvoiceWindow(softInvoice)
+		softInvoice.invoiceForm.OpenInvoiceForm(softInvoice)
 	})
 
 	err = m.loadInvoiceList(softInvoice)
@@ -63,25 +63,25 @@ func (m *MainWindow) OpenMainWindow(app *gtk.Application, softInvoice *SoftInvoi
 	m.popupMenu = NewPopupMenu(softInvoice, m)
 
 	// Show the main window
-	mainWindow.ShowAll()
+	window.ShowAll()
 }
 
-func (m *MainWindow) CloseMainWindow(softInvoice *SoftInvoice) {
+func (m *MainForm) CloseMainWindow(softInvoice *SoftInvoice) {
 	// Destroy the invoice window if it has been created
-	if softInvoice.invoiceWindow != nil && softInvoice.invoiceWindow.window != nil {
-		softInvoice.invoiceWindow.window.Destroy()
+	if softInvoice.invoiceForm != nil && softInvoice.invoiceForm.window != nil {
+		softInvoice.invoiceForm.window.Destroy()
 	}
 
 	// Destroy the preview window if it has been created
-	if softInvoice.previewWindow != nil && softInvoice.previewWindow.window != nil {
-		softInvoice.previewWindow.window.Destroy()
+	if softInvoice.previewWForm != nil && softInvoice.previewWForm.window != nil {
+		softInvoice.previewWForm.window.Destroy()
 	}
 
 	// Close the database
 	softInvoice.database.CloseDatabase()
 }
 
-func (m *MainWindow) loadInvoiceList(softInvoice *SoftInvoice) error {
+func (m *MainForm) loadInvoiceList(softInvoice *SoftInvoice) error {
 	invoices, err := softInvoice.database.GetAllInvoices()
 	if err != nil {
 		return err
@@ -126,18 +126,18 @@ func (m *MainWindow) loadInvoiceList(softInvoice *SoftInvoice) error {
 	return nil
 }
 
-func (m *MainWindow) invoiceClicked(treeView *gtk.TreeView, path *gtk.TreePath, column *gtk.TreeViewColumn, softInvoice *SoftInvoice) {
+func (m *MainForm) invoiceClicked(treeView *gtk.TreeView, path *gtk.TreePath, column *gtk.TreeViewColumn, softInvoice *SoftInvoice) {
 	invoice := m.getSelectedInvoice(treeView)
 	if invoice == nil {
 		return
 	}
 
-	softInvoice.previewWindow.OpenPreviewWindow(softInvoice, invoice)
+	softInvoice.previewWForm.OpenPreviewForm(softInvoice, invoice)
 	//creator := NewInvoiceCreator(invoice)
 	//creator.CreatePDF("/home/per/temp/test.pdf")
 }
 
-func (m *MainWindow) getSelectedInvoice(treeView *gtk.TreeView) *database.Invoice {
+func (m *MainForm) getSelectedInvoice(treeView *gtk.TreeView) *database.Invoice {
 	selection, err := treeView.GetSelection()
 	if err != nil {
 		return nil
@@ -167,7 +167,7 @@ func (m *MainWindow) getSelectedInvoice(treeView *gtk.TreeView) *database.Invoic
 	return nil
 }
 
-func (m *MainWindow) getColor(invoice *database.Invoice) string {
+func (m *MainForm) getColor(invoice *database.Invoice) string {
 	if invoice.Credit {
 		return "RED"
 	} else {

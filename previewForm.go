@@ -6,24 +6,24 @@ import (
 	"os"
 )
 
-type PreviewWindow struct {
+type PreviewForm struct {
 	window *gtk.Window
 }
 
-func NewPreviewWindow() *PreviewWindow {
-	window := new(PreviewWindow)
-	return window
+func NewPreviewForm() *PreviewForm {
+	previewForm := new(PreviewForm)
+	return previewForm
 }
 
-func (p *PreviewWindow) OpenPreviewWindow(softInvoice *SoftInvoice, invoice *database.Invoice) {
+func (p *PreviewForm) OpenPreviewForm(softInvoice *SoftInvoice, invoice *database.Invoice) {
 	// Check if it is the first time we open the preview window
-	if softInvoice.previewWindow.window==nil {
+	if softInvoice.previewWForm.window==nil {
 		// Get the preview window from glade
 		window, err := softInvoice.helper.GetWindow("preview_window")
 		errorCheck(err)
 
 		// Save a pointer to the preview window
-		softInvoice.previewWindow.window = window
+		softInvoice.previewWForm.window = window
 
 		// Set up the preview window
 		window.SetApplication(softInvoice.application)
@@ -41,7 +41,7 @@ func (p *PreviewWindow) OpenPreviewWindow(softInvoice *SoftInvoice, invoice *dat
 		window.ShowAll()
 	} else {
 		// Show the window
-		softInvoice.previewWindow.window.ShowAll()
+		softInvoice.previewWForm.window.ShowAll()
 	}
 
 	image, err := softInvoice.helper.GetImage("invoice_preview")
@@ -56,6 +56,6 @@ func (p *PreviewWindow) OpenPreviewWindow(softInvoice *SoftInvoice, invoice *dat
 	os.Remove(path)
 }
 
-func (p *PreviewWindow) ClosePreviewWindow() {
+func (p *PreviewForm) ClosePreviewWindow() {
 
 }
