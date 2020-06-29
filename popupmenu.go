@@ -38,8 +38,7 @@ func NewPopupMenu(softInvoice *SoftInvoice, mainWindow *MainWindow) *PopupMenu {
 			return
 		}
 
-		preview := NewPreviewWindow()
-		preview.OpenPreviewWindow(softInvoice, invoice)
+		softInvoice.previewWindow.OpenPreviewWindow(softInvoice, invoice)
 	})
 
 	pdf.Connect("activate", func() {

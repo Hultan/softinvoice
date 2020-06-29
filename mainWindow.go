@@ -52,8 +52,7 @@ func (m *MainWindow) OpenMainWindow(app *gtk.Application, softInvoice *SoftInvoi
 
 	// Hook up the clicked event for the new invoice button
 	button.Connect("clicked", func() {
-		invoiceWindow := NewInvoiceWindow()
-		invoiceWindow.OpenInvoiceWindow(softInvoice)
+		softInvoice.invoiceWindow.OpenInvoiceWindow(softInvoice)
 	})
 
 	err = m.loadInvoiceList(softInvoice)
@@ -69,13 +68,13 @@ func (m *MainWindow) OpenMainWindow(app *gtk.Application, softInvoice *SoftInvoi
 
 func (m *MainWindow) CloseMainWindow(softInvoice *SoftInvoice) {
 	// Destroy the invoice window if it has been created
-	if softInvoice.invoiceWindow != nil {
-		softInvoice.invoiceWindow.Destroy()
+	if softInvoice.invoiceWindow != nil && softInvoice.invoiceWindow.window != nil {
+		softInvoice.invoiceWindow.window.Destroy()
 	}
 
 	// Destroy the preview window if it has been created
-	if softInvoice.previewWindow != nil {
-		softInvoice.previewWindow.Destroy()
+	if softInvoice.previewWindow != nil && softInvoice.previewWindow.window != nil {
+		softInvoice.previewWindow.window.Destroy()
 	}
 
 	// Close the database
@@ -133,10 +132,9 @@ func (m *MainWindow) invoiceClicked(treeView *gtk.TreeView, path *gtk.TreePath, 
 		return
 	}
 
-	//preview := NewPreviewWindow()
-	//preview.OpenPreviewWindow(softInvoice, invoice)
-	creator := NewInvoiceCreator(invoice)
-	creator.CreatePDF("/home/per/temp/test.pdf")
+	softInvoice.previewWindow.OpenPreviewWindow(softInvoice, invoice)
+	//creator := NewInvoiceCreator(invoice)
+	//creator.CreatePDF("/home/per/temp/test.pdf")
 }
 
 func (m *MainWindow) getSelectedInvoice(treeView *gtk.TreeView) *database.Invoice {

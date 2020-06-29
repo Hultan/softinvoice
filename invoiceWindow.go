@@ -1,8 +1,12 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"github.com/gotk3/gotk3/gtk"
+)
 
 type InvoiceWindow struct {
+	window *gtk.Window
 }
 
 var isSaving = false
@@ -14,19 +18,20 @@ func NewInvoiceWindow() *InvoiceWindow {
 
 func (i *InvoiceWindow) OpenInvoiceWindow(softInvoice *SoftInvoice) {
 	// Check if it is the first time we open the invoice window
-	if softInvoice.invoiceWindow==nil {
+	if softInvoice.invoiceWindow.window==nil {
 		// Get the invoice window from glade
 		window, err := softInvoice.helper.GetWindow("invoice_window")
 		errorCheck(err)
 
 		// Save a pointer to the invoice window
-		softInvoice.invoiceWindow = window
+		softInvoice.invoiceWindow.window = window
 
 		// Set up the invoice window
 		window.SetApplication(softInvoice.application)
 		window.HideOnDelete()
 		window.SetModal(true)
 		window.SetKeepAbove(true)
+		window.SetPosition(gtk.WIN_POS_CENTER_ALWAYS)
 
 		// Hook up the hide event
 		window.Connect("hide", func() {
@@ -56,7 +61,7 @@ func (i *InvoiceWindow) OpenInvoiceWindow(softInvoice *SoftInvoice) {
 		window.ShowAll()
 	} else {
 		// Show the window
-		softInvoice.invoiceWindow.ShowAll()
+		softInvoice.invoiceWindow.window.ShowAll()
 	}
 }
 
