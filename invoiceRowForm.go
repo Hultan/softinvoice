@@ -75,8 +75,8 @@ func (i *InvoiceRowForm) OpenInvoiceRowForm(softInvoice *SoftInvoice, saveCallba
 		})
 
 		// Setup window
-		i.setupWindow(softInvoice)
-		i.setupProductCombo(softInvoice)
+		i.SetupWindow(softInvoice)
+		i.SetupProductCombo(softInvoice)
 	}
 
 	// Set default values
@@ -90,12 +90,16 @@ func (i *InvoiceRowForm) OpenInvoiceRowForm(softInvoice *SoftInvoice, saveCallba
 func (i *InvoiceRowForm) CloseInvoiceRowWindow(softInvoice *SoftInvoice) {
 	if isSavingRow {
 		isSavingRow = false
-		row := i.saveInvoiceRow()
+		row := i.SaveInvoiceRow()
 		i.SaveCallback(row)
 	}
 }
 
-func (i *InvoiceRowForm) setupWindow(softInvoice *SoftInvoice) {
+//
+//Setup functions
+//
+
+func (i *InvoiceRowForm) SetupWindow(softInvoice *SoftInvoice) {
 	// Get name entry
 	nameEntry, err := softInvoice.helper.GetEntry("productname_entry")
 	if err != nil {
@@ -125,7 +129,7 @@ func (i *InvoiceRowForm) setupWindow(softInvoice *SoftInvoice) {
 	i.amountEntry = amountEntry
 }
 
-func (i *InvoiceRowForm) setupProductCombo(softInvoice *SoftInvoice) {
+func (i *InvoiceRowForm) SetupProductCombo(softInvoice *SoftInvoice) {
 	// Get product combo
 	productCombo, err := softInvoice.helper.GetComboBox("product_combo")
 	if err != nil {
@@ -157,15 +161,21 @@ func (i *InvoiceRowForm) setupProductCombo(softInvoice *SoftInvoice) {
 	productCombo.PackStart(nameRenderer, true)
 	productCombo.AddAttribute(nameRenderer, "text", 2)
 
-	productCombo.Connect("changed", i.onProductChange, softInvoice)
+	productCombo.Connect("changed", i.OnProductChange, softInvoice)
 }
 
-func (i *InvoiceRowForm) onProductChange(customerCombo *gtk.ComboBox, softInvoice *SoftInvoice) {
+//
+// Signal handlers
+//
+
+func (i *InvoiceRowForm) OnProductChange(customerCombo *gtk.ComboBox, softInvoice *SoftInvoice) {
+	// Get the id of the selected product
 	iter, _ := customerCombo.GetActiveIter()
 	model, _ := customerCombo.GetModel()
 	idValue, _ := model.GetValue(iter, 0)
 	id, _ := idValue.GoValue()
 
+	// Find the selected product
 	var foundProduct database.Product
 	var found bool = false
 
@@ -181,24 +191,34 @@ func (i *InvoiceRowForm) onProductChange(customerCombo *gtk.ComboBox, softInvoic
 		panic("Customer not found!")
 	}
 
+	// Set some product related fields
 	i.nameEntry.SetText(foundProduct.Name)
 	i.textEntry.SetText(foundProduct.Text)
 	i.priceEntry.SetText(fmt.Sprintf("%.0f", foundProduct.Price))
 }
 
-func (i *InvoiceRowForm) saveInvoiceRow() *database.InvoiceRow {
+//
+// Save function
+//
+
+func (i *InvoiceRowForm) SaveInvoiceRow() *database.InvoiceRow {
 	var row database.InvoiceRow
+
+	// Get text and name
 	row.Text, _ = i.textEntry.GetText()
 	row.Name, _ = i.nameEntry.GetText()
 
+	// Get and parse the price field
 	priceString, _ := i.priceEntry.GetText()
 	price, _ := strconv.ParseFloat(priceString, 32)
 	row.Price = float32(price)
 
+	// Get and parse the amount field
 	amountString, _ := i.amountEntry.GetText()
 	amount, _ := strconv.ParseFloat(amountString, 32)
 	row.Amount = float32(amount)
 
+	// Calculate the row total (excl VAT)
 	row.Total = float32(amount * price)
 
 	return &row

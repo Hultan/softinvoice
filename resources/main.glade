@@ -202,6 +202,8 @@
               <object class="GtkImage">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
+                <property name="margin_top">5</property>
+                <property name="margin_bottom">5</property>
                 <property name="pixbuf">softteam.jpg</property>
               </object>
               <packing>
@@ -223,6 +225,8 @@
                     <property name="can_focus">True</property>
                     <property name="margin_left">13</property>
                     <property name="margin_right">13</property>
+                    <property name="hexpand">True</property>
+                    <property name="vexpand">True</property>
                     <property name="model">invoice_liststore</property>
                     <property name="enable_grid_lines">both</property>
                     <child internal-child="selection">

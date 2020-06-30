@@ -223,6 +223,8 @@
                     <property name="can_focus">True</property>
                     <property name="margin_left">13</property>
                     <property name="margin_right">13</property>
+                    <property name="hexpand">True</property>
+                    <property name="vexpand">True</property>
                     <property name="model">invoice_liststore</property>
                     <property name="enable_grid_lines">both</property>
                     <child internal-child="selection">
@@ -699,6 +701,31 @@
             <property name="can_focus">True</property>
             <child internal-child="selection">
               <object class="GtkTreeSelection"/>
+            </child>
+            <child>
+              <object class="GtkTreeViewColumn">
+                <property name="title" translatable="yes">Text</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkTreeViewColumn">
+                <property name="title" translatable="yes">Name</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkTreeViewColumn">
+                <property name="title" translatable="yes">Price</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkTreeViewColumn">
+                <property name="title" translatable="yes">Amount</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkTreeViewColumn">
+                <property name="title" translatable="yes">Total</property>
+              </object>
             </child>
           </object>
           <packing>

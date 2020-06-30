@@ -90,14 +90,14 @@ func (i *InvoiceForm) OpenInvoiceForm(softInvoice *SoftInvoice, reloadListCallba
 
 		// Hook up the clicked event for the add row button
 		addButton.Connect("clicked", func() {
-			softInvoice.invoiceRowForm.OpenInvoiceRowForm(softInvoice, i.invoiceRowAdded)
+			softInvoice.invoiceRowForm.OpenInvoiceRowForm(softInvoice, i.OnInvoiceRowAdded)
 		})
 	}
 
 	// Setup window
 	if i.customerCombo == nil {
-		i.setupWindow(softInvoice)
-		i.setupCustomerCombo(softInvoice)
+		i.SetupWindow(softInvoice)
+		i.SetupCustomerCombo(softInvoice)
 	}
 
 	// Set default values
@@ -107,6 +107,11 @@ func (i *InvoiceForm) OpenInvoiceForm(softInvoice *SoftInvoice, reloadListCallba
 	currentTime := time.Now()
 	i.calendar.SelectMonth(uint(currentTime.Month())-1, uint(currentTime.Year()))
 	i.calendar.SelectDay(uint(currentTime.Day()))
+	next, err := softInvoice.database.GetNextInvoiceNumber()
+	if err != nil {
+		panic(fmt.Sprintf("Failed to get next invoice number : %s", err.Error()))
+	}
+	i.invoiceNumberEntry.SetText(strconv.Itoa(next))
 
 	// Show the window
 	softInvoice.invoiceForm.window.ShowAll()
@@ -115,12 +120,18 @@ func (i *InvoiceForm) OpenInvoiceForm(softInvoice *SoftInvoice, reloadListCallba
 func (i *InvoiceForm) CloseInvoiceWindow(softInvoice *SoftInvoice) {
 	if isSaving {
 		isSaving = false
-		i.saveInvoice(softInvoice)
+		// Save the new invoice
+		i.SaveInvoice(softInvoice)
+		// Make sure the main form reloads the list of invoices
 		i.reloadListCallback(softInvoice)
 	}
 }
 
-func (i *InvoiceForm) setupWindow(softInvoice *SoftInvoice) {
+//
+// Setup functions
+//
+
+func (i *InvoiceForm) SetupWindow(softInvoice *SoftInvoice) {
 	// Get name entry
 	nameEntry, err := softInvoice.helper.GetEntry("name_entry")
 	if err != nil {
@@ -176,15 +187,10 @@ func (i *InvoiceForm) setupWindow(softInvoice *SoftInvoice) {
 		fmt.Println("Failed to get calendar : ", err.Error())
 	}
 	i.calendar = calendar
-
-	calendar.Connect("day-selected", func() {
-		year, month, day := i.calendar.GetDate()
-		date := fmt.Sprintf("%d-%.2d-%.2d", year, month+1, day)
-		invoiceDateEntry.SetText(date)
-	})
+	calendar.Connect("day-selected", i.OnCalendarDateChanged)
 }
 
-func (i *InvoiceForm) setupCustomerCombo(softInvoice *SoftInvoice) {
+func (i *InvoiceForm) SetupCustomerCombo(softInvoice *SoftInvoice) {
 	// Get customer combo
 	customerCombo, err := softInvoice.helper.GetComboBox("customer_combo")
 	if err != nil {
@@ -216,15 +222,22 @@ func (i *InvoiceForm) setupCustomerCombo(softInvoice *SoftInvoice) {
 	customerCombo.PackStart(nameRenderer, true)
 	customerCombo.AddAttribute(nameRenderer, "text", 2)
 
-	customerCombo.Connect("changed", i.onCustomerChange, softInvoice)
+	// Hook up customer change signal
+	customerCombo.Connect("changed", i.OnCustomerChange, softInvoice)
 }
 
-func (i *InvoiceForm) onCustomerChange(customerCombo *gtk.ComboBox, softInvoice *SoftInvoice) {
+//
+// Signal handlers
+//
+
+func (i *InvoiceForm) OnCustomerChange(customerCombo *gtk.ComboBox, softInvoice *SoftInvoice) {
+	// Get the id of the selected row
 	iter, _ := customerCombo.GetActiveIter()
 	model, _ := customerCombo.GetModel()
 	idValue, _ := model.GetValue(iter, 0)
 	id, _ := idValue.GoValue()
 
+	// Loop through customers and find the selected one
 	var foundCustomer database.Customer
 	var found bool = false
 
@@ -239,55 +252,73 @@ func (i *InvoiceForm) onCustomerChange(customerCombo *gtk.ComboBox, softInvoice 
 	if !found {
 		panic("Customer not found!")
 	}
-
 	i.customer = foundCustomer
 
+	// Set some customer related fields
 	i.nameEntry.SetText(foundCustomer.Name)
 	i.addressEntry.SetText(foundCustomer.Address)
 	i.postalAddressEntry.SetText(foundCustomer.PostalAddress)
 	i.paydayEntry.SetText(strconv.Itoa(foundCustomer.PayDay))
 	i.yourReferenceEntry.SetText(foundCustomer.Reference)
-	next, err := softInvoice.database.GetNextInvoiceNumber()
-	if err != nil {
-		panic(fmt.Sprintf("Failed to get next invoice number : %s", err.Error()))
-	}
-	i.invoiceNumberEntry.SetText(strconv.Itoa(next))
 }
 
-func (i *InvoiceForm) saveInvoice(softInvoice *SoftInvoice) bool {
+func (i *InvoiceForm) OnInvoiceRowAdded(row *database.InvoiceRow) {
+	i.invoice.Rows = append(i.invoice.Rows, *row)
+}
+
+func (i *InvoiceForm) OnCalendarDateChanged() {
+	year, month, day := i.calendar.GetDate()
+	date := fmt.Sprintf("%d-%.2d-%.2d", year, month+1, day)
+	i.invoiceDateEntry.SetText(date)
+}
+
+//
+// Save invoice function
+//
+
+func (i *InvoiceForm) SaveInvoice(softInvoice *SoftInvoice) bool {
+	// Check that a customer has been selected
 	if i.customer.Number=="" {
 		messagebox.NewMessageBox("Missing customer...","The invoice is missing a customer!", i.window)
 		panic("missing customer")
 	}
 
+	// Get invoice number
 	number, _ := i.invoiceNumberEntry.GetText()
 	i.invoice.Number, _ = strconv.Atoi(number)
 
+	// Get and parse invoice date
 	dateString, _ := i.invoiceDateEntry.GetText()
 	date, _ := time.Parse(constDateLayout, dateString)
 	i.invoice.Date = date
 
+	// Get and parse paydays
 	payDayString, _ := i.paydayEntry.GetText()
 	payDay, _ := strconv.Atoi(payDayString)
 	i.invoice.PayDay = payDay
 
+	// Calculate due date
 	dueDate := date.AddDate(0, 0, payDay)
 	i.invoice.DueDate = dueDate
 
+	// Set some customer related fields
 	i.invoice.CustomerNumber = i.customer.Number
 	i.invoice.CustomerName = i.customer.Name
 	i.invoice.CustomerAddress = i.customer.Address
 	i.invoice.CustomerPostalAddress = i.customer.PostalAddress
 	i.invoice.CustomerReference = i.customer.Reference
 
+	// Credit invoices (not done yet)
 	i.invoice.Credit = false
 	i.invoice.CreditInvoiceNumber = sql.NullInt32 {
 		Int32: 0,
 		Valid: false,
 	}
 
+	// Handle read only flag (not done yet)
 	i.invoice.ReadOnly = false
 
+	// Calculate amounts
 	var amountWithoutVAT float32
 	for _, value := range i.invoice.Rows {
 		amountWithoutVAT += value.Total
@@ -301,11 +332,8 @@ func (i *InvoiceForm) saveInvoice(softInvoice *SoftInvoice) bool {
 	err := softInvoice.database.InsertInvoice(&i.invoice)
 	if err!=nil {
 		fmt.Println(err.Error())
+		panic(err.Error())
 	}
 
 	return true
-}
-
-func (i *InvoiceForm) invoiceRowAdded(row *database.InvoiceRow) {
-	i.invoice.Rows = append(i.invoice.Rows, *row)
 }

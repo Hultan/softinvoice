@@ -89,16 +89,16 @@ func (i *InvoiceCreator) CreatePNG() (*gdk.Pixbuf, string) {
 
 func (i *InvoiceCreator) FillInvoiceTextPNG(cr *cairo.Context) {
 	// Header : Left
-	i.writeTextOnPNG(cr, 15, cairo.FONT_WEIGHT_NORMAL, 380,216,i.Invoice.Date.Format(constDateLayout), true)
-	i.writeTextOnPNG(cr, 15, cairo.FONT_WEIGHT_NORMAL, 380,236,fmt.Sprintf("%d",i.Invoice.Number), true)
-	i.writeTextOnPNG(cr, 15, cairo.FONT_WEIGHT_NORMAL, 380,257,i.Invoice.CustomerNumber, true)
-	i.writeTextOnPNG(cr, 15, cairo.FONT_WEIGHT_NORMAL, 380,287,i.Invoice.CustomerReference, true)
-	i.writeTextOnPNG(cr, 15, cairo.FONT_WEIGHT_NORMAL, 380,307,"Per Hultqvist", true)
+	i.WriteTextOnPNG(cr, 15, cairo.FONT_WEIGHT_NORMAL, 380,216,i.Invoice.Date.Format(constDateLayout), true)
+	i.WriteTextOnPNG(cr, 15, cairo.FONT_WEIGHT_NORMAL, 380,236,fmt.Sprintf("%d",i.Invoice.Number), true)
+	i.WriteTextOnPNG(cr, 15, cairo.FONT_WEIGHT_NORMAL, 380,257,i.Invoice.CustomerNumber, true)
+	i.WriteTextOnPNG(cr, 15, cairo.FONT_WEIGHT_NORMAL, 380,287,i.Invoice.CustomerReference, true)
+	i.WriteTextOnPNG(cr, 15, cairo.FONT_WEIGHT_NORMAL, 380,307,"Per Hultqvist", true)
 
 	// Header : Right
-	i.writeTextOnPNG(cr, 15, cairo.FONT_WEIGHT_NORMAL, 450,236,i.Invoice.CustomerName,false)
-	i.writeTextOnPNG(cr, 15, cairo.FONT_WEIGHT_NORMAL, 450,256,i.Invoice.CustomerAddress,false)
-	i.writeTextOnPNG(cr, 15, cairo.FONT_WEIGHT_NORMAL, 450,276,i.Invoice.CustomerPostalAddress,false)
+	i.WriteTextOnPNG(cr, 15, cairo.FONT_WEIGHT_NORMAL, 450,236,i.Invoice.CustomerName,false)
+	i.WriteTextOnPNG(cr, 15, cairo.FONT_WEIGHT_NORMAL, 450,256,i.Invoice.CustomerAddress,false)
+	i.WriteTextOnPNG(cr, 15, cairo.FONT_WEIGHT_NORMAL, 450,276,i.Invoice.CustomerPostalAddress,false)
 
 	// Rows
 	p := message.NewPrinter(language.Swedish)
@@ -106,11 +106,11 @@ func (i *InvoiceCreator) FillInvoiceTextPNG(cr *cairo.Context) {
 
 	for index, invoiceRow := range i.Invoice.Rows {
 		offset := float64(index) * 50
-		i.writeTextOnPNG(cr, 15, cairo.FONT_WEIGHT_NORMAL, 110,400 + offset,invoiceRow.Text,false)
-		i.writeTextOnPNG(cr, 15, cairo.FONT_WEIGHT_NORMAL, 110,420 + offset,invoiceRow.Name,false)
-		i.writeTextOnPNG(cr, 15, cairo.FONT_WEIGHT_NORMAL, 523,420 + offset,p.Sprintf("%.1f",invoiceRow.Amount), true)
-		i.writeTextOnPNG(cr, 15, cairo.FONT_WEIGHT_NORMAL, 600,420 + offset,p.Sprintf("%.0f",invoiceRow.Price), true)
-		i.writeTextOnPNG(cr, 15, cairo.FONT_WEIGHT_NORMAL, 710,420 + offset,p.Sprintf("%.2f",invoiceRow.Total), true)
+		i.WriteTextOnPNG(cr, 15, cairo.FONT_WEIGHT_NORMAL, 110,400 + offset,invoiceRow.Text,false)
+		i.WriteTextOnPNG(cr, 15, cairo.FONT_WEIGHT_NORMAL, 110,420 + offset,invoiceRow.Name,false)
+		i.WriteTextOnPNG(cr, 15, cairo.FONT_WEIGHT_NORMAL, 523,420 + offset,p.Sprintf("%.1f",invoiceRow.Amount), true)
+		i.WriteTextOnPNG(cr, 15, cairo.FONT_WEIGHT_NORMAL, 600,420 + offset,p.Sprintf("%.0f",invoiceRow.Price), true)
+		i.WriteTextOnPNG(cr, 15, cairo.FONT_WEIGHT_NORMAL, 710,420 + offset,p.Sprintf("%.2f",invoiceRow.Total), true)
 
 		sumExclVAT += invoiceRow.Total
 	}
@@ -119,18 +119,18 @@ func (i *InvoiceCreator) FillInvoiceTextPNG(cr *cairo.Context) {
 	sumInclVAT:=sumExclVAT*1.25
 	toPay := float32(int(sumInclVAT))
 	rounded:=float32(int(sumInclVAT)) - sumInclVAT
-	i.writeTextOnPNG(cr, 15, cairo.FONT_WEIGHT_NORMAL, 710,789 ,p.Sprintf("%.2f",sumExclVAT), true)
-	i.writeTextOnPNG(cr, 15, cairo.FONT_WEIGHT_NORMAL, 710,807 ,p.Sprintf("%.2f",vat), true)
-	i.writeTextOnPNG(cr, 15, cairo.FONT_WEIGHT_NORMAL, 710,832 ,p.Sprintf("%.2f",sumInclVAT), true)
-	i.writeTextOnPNG(cr, 15, cairo.FONT_WEIGHT_NORMAL, 710,850 ,p.Sprintf("%.2f",rounded), true)
+	i.WriteTextOnPNG(cr, 15, cairo.FONT_WEIGHT_NORMAL, 710,789 ,p.Sprintf("%.2f",sumExclVAT), true)
+	i.WriteTextOnPNG(cr, 15, cairo.FONT_WEIGHT_NORMAL, 710,807 ,p.Sprintf("%.2f",vat), true)
+	i.WriteTextOnPNG(cr, 15, cairo.FONT_WEIGHT_NORMAL, 710,832 ,p.Sprintf("%.2f",sumInclVAT), true)
+	i.WriteTextOnPNG(cr, 15, cairo.FONT_WEIGHT_NORMAL, 710,850 ,p.Sprintf("%.2f",rounded), true)
 
-	i.writeTextOnPNG(cr, 16, cairo.FONT_WEIGHT_NORMAL, 190,883 ,"5689-1849", false)
-	i.writeTextOnPNG(cr, 16, cairo.FONT_WEIGHT_NORMAL, 405,883 ,i.Invoice.DueDate.Format(constDateLayout), false)
-	i.writeTextOnPNG(cr, 16, cairo.FONT_WEIGHT_BOLD, 710,883 ,p.Sprintf("%.2f",toPay), true)
+	i.WriteTextOnPNG(cr, 16, cairo.FONT_WEIGHT_NORMAL, 190,883 ,"5689-1849", false)
+	i.WriteTextOnPNG(cr, 16, cairo.FONT_WEIGHT_NORMAL, 405,883 ,i.Invoice.DueDate.Format(constDateLayout), false)
+	i.WriteTextOnPNG(cr, 16, cairo.FONT_WEIGHT_BOLD, 710,883 ,p.Sprintf("%.2f",toPay), true)
 
 }
 
-func (i *InvoiceCreator) writeTextOnPNG(cr *cairo.Context, fontSize float64, fontWeight cairo.FontWeight, x float64,y float64, text string, rightJustify bool ) {
+func (i *InvoiceCreator) WriteTextOnPNG(cr *cairo.Context, fontSize float64, fontWeight cairo.FontWeight, x float64,y float64, text string, rightJustify bool ) {
 	// Write text
 	cr.SetSourceRGB(0,0,0)
 	cr.SetFontSize(fontSize)
