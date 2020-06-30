@@ -67,10 +67,19 @@ func (i *InvoiceForm) OpenInvoiceForm(softInvoice *SoftInvoice) {
 		saveButton, err := softInvoice.helper.GetButton("save_button")
 		errorCheck(err)
 
-		// Hook up the clicked event for the cancel button
+		// Hook up the clicked event for the save button
 		saveButton.Connect("clicked", func() {
 			isSaving = true
 			window.Hide()
+		})
+
+		// Get the add button
+		addButton, err := softInvoice.helper.GetButton("addrow_button")
+		errorCheck(err)
+
+		// Hook up the clicked event for the add row button
+		addButton.Connect("clicked", func() {
+			softInvoice.invoiceRowForm.OpenInvoiceRowForm(softInvoice, i.invoiceRowAdded)
 		})
 	}
 
@@ -83,7 +92,7 @@ func (i *InvoiceForm) OpenInvoiceForm(softInvoice *SoftInvoice) {
 	// Set default values
 	i.customerCombo.SetActive(0)
 	currentTime := time.Now()
-	i.calendar.SelectMonth(uint(currentTime.Year()),uint(currentTime.Month()))
+	i.calendar.SelectMonth(uint(currentTime.Month())-1, uint(currentTime.Year()))
 	i.calendar.SelectDay(uint(currentTime.Day()))
 
 	// Show the window
@@ -231,4 +240,8 @@ func (i *InvoiceForm) onCustomerChange(customerCombo *gtk.ComboBox, softInvoice 
 
 func (i *InvoiceForm) saveInvoice() {
 	fmt.Println("SAVE!")
+}
+
+func (i *InvoiceForm) invoiceRowAdded(row *database.InvoiceRow) {
+	fmt.Println("SAVE")
 }

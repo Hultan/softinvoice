@@ -68,6 +68,11 @@ func (m *MainForm) OpenMainForm(app *gtk.Application, softInvoice *SoftInvoice) 
 
 func (m *MainForm) CloseMainWindow(softInvoice *SoftInvoice) {
 	// Destroy the invoice window if it has been created
+	if softInvoice.invoiceRowForm != nil && softInvoice.invoiceRowForm.window != nil {
+		softInvoice.invoiceRowForm.window.Destroy()
+	}
+
+	// Destroy the invoice window if it has been created
 	if softInvoice.invoiceForm != nil && softInvoice.invoiceForm.window != nil {
 		softInvoice.invoiceForm.window.Destroy()
 	}

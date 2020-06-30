@@ -15,12 +15,13 @@ const ApplicationFlags glib.ApplicationFlags = glib.APPLICATION_FLAGS_NONE
 
 // The SoftInvoice application type
 type SoftInvoice struct {
-	application  *gtk.Application
-	mainForm     *MainForm
-	invoiceForm  *InvoiceForm
-	previewWForm *PreviewForm
-	helper       *gtkhelper.GtkHelper
-	database     *database.Database
+	application    *gtk.Application
+	mainForm       *MainForm
+	invoiceForm    *InvoiceForm
+	invoiceRowForm *InvoiceRowForm
+	previewWForm   *PreviewForm
+	helper         *gtkhelper.GtkHelper
+	database       *database.Database
 }
 
 func main() {
@@ -46,6 +47,7 @@ func main() {
 func NewSoftInvoice(app *gtk.Application) *SoftInvoice {
 	softInvoice := new(SoftInvoice)
 	softInvoice.invoiceForm = NewInvoiceForm()
+	softInvoice.invoiceRowForm = NewInvoiceRowForm()
 	softInvoice.previewWForm = NewPreviewForm()
 	softInvoice.database = new(database.Database)
 	softInvoice.application = app
