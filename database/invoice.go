@@ -11,7 +11,6 @@ type Invoice struct {
 	Date                  time.Time     `gorm:"column:date"`
 	DueDate               time.Time     `gorm:"column:duedate"`
 	Amount                float32       `gorm:"column:amount"`
-	CustomerId            int           `gorm:"column:customerid"`
 	CustomerNumber        string        `gorm:"column:customernumber;size:100"`
 	CustomerName          string        `gorm:"column:customername;size:100"`
 	CustomerAddress       string        `gorm:"column:customeraddress;size:100"`
@@ -22,24 +21,9 @@ type Invoice struct {
 	CreditInvoiceNumber   sql.NullInt32 `gorm:"column:creditinvoicenumber;default:null"`
 	ReadOnly              bool          `gorm:"column:readonly;default:false"`
 
-	Rows []InvoiceRow `gorm:"foreignkey:id"`
+	Rows []InvoiceRow //`gorm:"foreignkey:Id"`
 }
 
-func (p *Invoice) TableName() string {
+func (i *Invoice) TableName() string {
 	return "invoice"
-}
-
-func (i *Invoice) AddInvoiceRow(invoiceId int, product *Product, amount float32) *InvoiceRow {
-	row := new(InvoiceRow)
-
-	row.InvoiceId = invoiceId
-	row.Text = product.Text
-	row.Name = product.Name
-	row.Price = product.Price
-	row.Amount = amount
-	row.Total = amount * product.Price
-
-	i.Rows = append(i.Rows, *row)
-
-	return row
 }

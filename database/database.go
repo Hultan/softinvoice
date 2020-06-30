@@ -14,6 +14,25 @@ type Database struct {
 	db *gorm.DB
 }
 
+func (d *Database) InsertInvoice(invoice *Invoice) error {
+	db, err := d.getDatabase()
+	if err != nil {
+		return err
+	}
+	if result := db.Create(invoice); result.Error != nil {
+		return result.Error
+	}
+
+	//for _,value := range invoice.Rows {
+	//	value.InvoiceId = invoice.Id
+	//	if result := db.Save(invoice); result.Error != nil {
+	//		return result.Error
+	//	}
+	//}
+
+	return nil
+}
+
 func (d *Database) UpdateProduct(product *Product) error {
 	db, err := d.getDatabase()
 	if err != nil {

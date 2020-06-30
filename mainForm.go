@@ -52,7 +52,7 @@ func (m *MainForm) OpenMainForm(app *gtk.Application, softInvoice *SoftInvoice) 
 
 	// Hook up the clicked event for the new invoice button
 	button.Connect("clicked", func() {
-		softInvoice.invoiceForm.OpenInvoiceForm(softInvoice)
+		softInvoice.invoiceForm.OpenInvoiceForm(softInvoice, m.loadInvoiceList)
 	})
 
 	err = m.loadInvoiceList(softInvoice)

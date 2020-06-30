@@ -2,7 +2,7 @@ package database
 
 type InvoiceRow struct {
 	Id        int     `gorm:"column:id;primary_key"`
-	InvoiceId int     `gorm:"column:invoiceid;foreignkey:id"`
+	InvoiceId int     `gorm:"column:invoiceid;"`
 	Text      string  `gorm:"column:producttext;size:100"`
 	Name      string  `gorm:"column:productname;size:100"`
 	Price     float32 `gorm:"column:productprice"`

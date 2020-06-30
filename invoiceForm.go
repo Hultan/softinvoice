@@ -1,13 +1,18 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
+	"github.com/davecgh/go-spew/spew"
 	"github.com/gotk3/gotk3/glib"
 	"github.com/gotk3/gotk3/gtk"
 	"github.com/hultan/softteam-invoice/database"
+	"github.com/hultan/softteam/messagebox"
 	"strconv"
 	"time"
 )
+
+type ReloadListCallback func(*SoftInvoice) error
 
 type InvoiceForm struct {
 	window *gtk.Window
@@ -22,7 +27,11 @@ type InvoiceForm struct {
 	invoiceDateEntry   *gtk.Entry
 	calendar           *gtk.Calendar
 
+	customer  database.Customer
 	customers []database.Customer
+	invoice   database.Invoice
+
+	reloadListCallback ReloadListCallback
 }
 
 var isSaving = false
@@ -32,7 +41,9 @@ func NewInvoiceForm() *InvoiceForm {
 	return invoiceForm
 }
 
-func (i *InvoiceForm) OpenInvoiceForm(softInvoice *SoftInvoice) {
+func (i *InvoiceForm) OpenInvoiceForm(softInvoice *SoftInvoice, reloadListCallback ReloadListCallback) {
+	i.reloadListCallback = reloadListCallback
+
 	// Check if it is the first time we open the invoice window
 	if softInvoice.invoiceForm.window == nil {
 		// Get the invoice window from glade
@@ -51,7 +62,7 @@ func (i *InvoiceForm) OpenInvoiceForm(softInvoice *SoftInvoice) {
 
 		// Hook up the hide event
 		window.Connect("hide", func() {
-			i.CloseInvoiceWindow()
+			i.CloseInvoiceWindow(softInvoice)
 		})
 
 		// Get the cancel button
@@ -90,6 +101,8 @@ func (i *InvoiceForm) OpenInvoiceForm(softInvoice *SoftInvoice) {
 	}
 
 	// Set default values
+	i.invoice = database.Invoice{}
+	i.customer = database.Customer{}
 	i.customerCombo.SetActive(0)
 	currentTime := time.Now()
 	i.calendar.SelectMonth(uint(currentTime.Month())-1, uint(currentTime.Year()))
@@ -99,10 +112,11 @@ func (i *InvoiceForm) OpenInvoiceForm(softInvoice *SoftInvoice) {
 	softInvoice.invoiceForm.window.ShowAll()
 }
 
-func (i *InvoiceForm) CloseInvoiceWindow() {
+func (i *InvoiceForm) CloseInvoiceWindow(softInvoice *SoftInvoice) {
 	if isSaving {
 		isSaving = false
-		i.saveInvoice()
+		i.saveInvoice(softInvoice)
+		i.reloadListCallback(softInvoice)
 	}
 }
 
@@ -165,7 +179,7 @@ func (i *InvoiceForm) setupWindow(softInvoice *SoftInvoice) {
 
 	calendar.Connect("day-selected", func() {
 		year, month, day := i.calendar.GetDate()
-		date := fmt.Sprintf("%d-%.2d-%.2d", year, month, day)
+		date := fmt.Sprintf("%d-%.2d-%.2d", year, month+1, day)
 		invoiceDateEntry.SetText(date)
 	})
 }
@@ -226,6 +240,8 @@ func (i *InvoiceForm) onCustomerChange(customerCombo *gtk.ComboBox, softInvoice 
 		panic("Customer not found!")
 	}
 
+	i.customer = foundCustomer
+
 	i.nameEntry.SetText(foundCustomer.Name)
 	i.addressEntry.SetText(foundCustomer.Address)
 	i.postalAddressEntry.SetText(foundCustomer.PostalAddress)
@@ -238,10 +254,58 @@ func (i *InvoiceForm) onCustomerChange(customerCombo *gtk.ComboBox, softInvoice 
 	i.invoiceNumberEntry.SetText(strconv.Itoa(next))
 }
 
-func (i *InvoiceForm) saveInvoice() {
-	fmt.Println("SAVE!")
+func (i *InvoiceForm) saveInvoice(softInvoice *SoftInvoice) bool {
+	if i.customer.Number=="" {
+		messagebox.NewMessageBox("Missing customer...","The invoice is missing a customer!", i.window)
+		panic("missing customer")
+	}
+
+	number, _ := i.invoiceNumberEntry.GetText()
+	i.invoice.Number, _ = strconv.Atoi(number)
+
+	dateString, _ := i.invoiceDateEntry.GetText()
+	date, _ := time.Parse(constDateLayout, dateString)
+	i.invoice.Date = date
+
+	payDayString, _ := i.paydayEntry.GetText()
+	payDay, _ := strconv.Atoi(payDayString)
+	i.invoice.PayDay = payDay
+
+	dueDate := date.AddDate(0, 0, payDay)
+	i.invoice.DueDate = dueDate
+
+	i.invoice.CustomerNumber = i.customer.Number
+	i.invoice.CustomerName = i.customer.Name
+	i.invoice.CustomerAddress = i.customer.Address
+	i.invoice.CustomerPostalAddress = i.customer.PostalAddress
+	i.invoice.CustomerReference = i.customer.Reference
+
+	i.invoice.Credit = false
+	i.invoice.CreditInvoiceNumber = sql.NullInt32 {
+		Int32: 0,
+		Valid: false,
+	}
+
+	i.invoice.ReadOnly = false
+
+	var amountWithoutVAT float32
+	for _, value := range i.invoice.Rows {
+		amountWithoutVAT += value.Total
+	}
+	i.invoice.Amount = amountWithoutVAT * 1.25
+
+	// Pretty print (spew) the invoice
+	spew.Dump(i.invoice)
+
+	// Save invoice
+	err := softInvoice.database.InsertInvoice(&i.invoice)
+	if err!=nil {
+		fmt.Println(err.Error())
+	}
+
+	return true
 }
 
 func (i *InvoiceForm) invoiceRowAdded(row *database.InvoiceRow) {
-	fmt.Println("SAVE")
+	i.invoice.Rows = append(i.invoice.Rows, *row)
 }
