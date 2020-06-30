@@ -23,13 +23,6 @@ func (d *Database) InsertInvoice(invoice *Invoice) error {
 		return result.Error
 	}
 
-	//for _,value := range invoice.Rows {
-	//	value.InvoiceId = invoice.Id
-	//	if result := db.Save(invoice); result.Error != nil {
-	//		return result.Error
-	//	}
-	//}
-
 	return nil
 }
 
