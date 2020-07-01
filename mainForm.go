@@ -28,7 +28,10 @@ func (m *MainForm) OpenMainForm(app *gtk.Application, softInvoice *SoftInvoice) 
 	gtk.Init(&os.Args)
 
 	// Create a new gtk helper
-	softInvoice.helper = gtkhelper.GtkHelperNewFromFile("resources/main.glade")
+	softInvoice.helper = gtkhelper.GtkHelperNewFromFile("main.glade")
+	if softInvoice.helper==nil {
+		panic("glade file not found!")
+	}
 
 	// Get the main window from the glade file
 	window, err := softInvoice.helper.GetApplicationWindow("main_window")

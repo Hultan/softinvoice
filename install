@@ -1,0 +1,4 @@
+rm -dr /opt/softteam-invoice
+mkdir /opt/softteam-invoice
+yes | cp /home/per/go/src/github.com/hultan/softteam-invoice/build/softinvoice /opt/softteam-invoice
+yes | cp -R /home/per/go/src/github.com/hultan/softteam-invoice/resources /opt/softteam-invoice
