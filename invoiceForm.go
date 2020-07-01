@@ -26,6 +26,8 @@ type InvoiceForm struct {
 	invoiceNumberEntry *gtk.Entry
 	invoiceDateEntry   *gtk.Entry
 	calendar           *gtk.Calendar
+	invoiceRowTreeview    *gtk.TreeView
+	rowListStore       *gtk.ListStore
 
 	customer  database.Customer
 	customers []database.Customer
@@ -42,6 +44,7 @@ func NewInvoiceForm() *InvoiceForm {
 }
 
 func (i *InvoiceForm) OpenInvoiceForm(softInvoice *SoftInvoice, reloadListCallback ReloadListCallback) {
+	var err error
 	i.reloadListCallback = reloadListCallback
 
 	// Check if it is the first time we open the invoice window
@@ -92,6 +95,11 @@ func (i *InvoiceForm) OpenInvoiceForm(softInvoice *SoftInvoice, reloadListCallba
 		addButton.Connect("clicked", func() {
 			softInvoice.invoiceRowForm.OpenInvoiceRowForm(softInvoice, i.OnInvoiceRowAdded)
 		})
+
+		// Get row treeview
+		treeview, err := softInvoice.helper.GetTreeView("invoicerow_treeview")
+		errorCheck(err)
+		i.invoiceRowTreeview = treeview
 	}
 
 	// Setup window
@@ -99,6 +107,11 @@ func (i *InvoiceForm) OpenInvoiceForm(softInvoice *SoftInvoice, reloadListCallba
 		i.SetupWindow(softInvoice)
 		i.SetupCustomerCombo(softInvoice)
 	}
+
+	// Create row list store
+	i.rowListStore, err = gtk.ListStoreNew(glib.TYPE_STRING, glib.TYPE_STRING, glib.TYPE_STRING, glib.TYPE_STRING, glib.TYPE_STRING)
+	errorCheck(err)
+	i.invoiceRowTreeview.SetModel(i.rowListStore)
 
 	// Set default values
 	i.invoice = database.Invoice{}
@@ -264,6 +277,7 @@ func (i *InvoiceForm) OnCustomerChange(customerCombo *gtk.ComboBox, softInvoice 
 
 func (i *InvoiceForm) OnInvoiceRowAdded(row *database.InvoiceRow) {
 	i.invoice.Rows = append(i.invoice.Rows, *row)
+	i.AddInvoiceRow(row)
 }
 
 func (i *InvoiceForm) OnCalendarDateChanged() {
@@ -278,8 +292,8 @@ func (i *InvoiceForm) OnCalendarDateChanged() {
 
 func (i *InvoiceForm) SaveInvoice(softInvoice *SoftInvoice) bool {
 	// Check that a customer has been selected
-	if i.customer.Number=="" {
-		messagebox.NewMessageBox("Missing customer...","The invoice is missing a customer!", i.window)
+	if i.customer.Number == "" {
+		messagebox.NewMessageBox("Missing customer...", "The invoice is missing a customer!", i.window)
 		panic("missing customer")
 	}
 
@@ -310,7 +324,7 @@ func (i *InvoiceForm) SaveInvoice(softInvoice *SoftInvoice) bool {
 
 	// Credit invoices (not done yet)
 	i.invoice.Credit = false
-	i.invoice.CreditInvoiceNumber = sql.NullInt32 {
+	i.invoice.CreditInvoiceNumber = sql.NullInt32{
 		Int32: 0,
 		Valid: false,
 	}
@@ -330,10 +344,29 @@ func (i *InvoiceForm) SaveInvoice(softInvoice *SoftInvoice) bool {
 
 	// Save invoice
 	err := softInvoice.database.InsertInvoice(&i.invoice)
-	if err!=nil {
+	if err != nil {
 		fmt.Println(err.Error())
 		panic(err.Error())
 	}
 
 	return true
+}
+
+//
+// Invoice rows
+//
+
+func (i *InvoiceForm) AddInvoiceRow(invoiceRow *database.InvoiceRow) {
+	i.invoiceRowTreeview.SetModel(nil)
+
+	iter := i.rowListStore.Append()
+	i.rowListStore.Set(iter, []int{0, 1, 2, 3, 4}, []interface{}{
+		invoiceRow.Text,
+		invoiceRow.Name,
+		strconv.FormatFloat(float64(invoiceRow.Price),'f',2,32),
+		strconv.FormatFloat(float64(invoiceRow.Amount),'f',2,32),
+		strconv.FormatFloat(float64(invoiceRow.Total),'f',2,32),
+	})
+
+	i.invoiceRowTreeview.SetModel(i.rowListStore)
 }
