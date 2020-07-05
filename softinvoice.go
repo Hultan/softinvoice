@@ -24,7 +24,7 @@ func NewSoftInvoice(app *gtk.Application) *SoftInvoice {
 	softInvoice.invoiceForm = NewInvoiceForm()
 	softInvoice.invoiceRowForm = NewInvoiceRowForm()
 	softInvoice.previewWForm = NewPreviewForm()
-	softInvoice.database = new(database.Database)
+	softInvoice.database = database.NewDatabase(useTestDatabase)
 	softInvoice.application = app
 	return softInvoice
 }

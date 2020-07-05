@@ -40,7 +40,7 @@ func (m *MainForm) OpenMainForm(app *gtk.Application, softInvoice *SoftInvoice) 
 
 	// Set up main window
 	window.SetApplication(app)
-	title := fmt.Sprintf("SoftInvoice - [Database : %s]", database.DatabaseName)
+	title := fmt.Sprintf("SoftInvoice - [Database : %s]", softInvoice.database.GetDatabaseName())
 	window.SetTitle(title)
 	window.SetDefaultSize(1024, 768)
 

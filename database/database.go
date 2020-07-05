@@ -11,7 +11,14 @@ import (
 )
 
 type Database struct {
-	db *gorm.DB
+	UseTestDatabase bool
+	db              *gorm.DB
+}
+
+func NewDatabase(useTestDatabase bool) *Database {
+	database:=new(Database)
+	database.UseTestDatabase = useTestDatabase
+	return database
 }
 
 func (d *Database) InsertInvoice(invoice *Invoice) error {
@@ -150,9 +157,9 @@ func (d *Database) GetNextInvoiceNumber() (int, error) {
 	}
 	var result int
 
-	row:=db.Table("invoice").Select("MAX(number)").Row()
+	row := db.Table("invoice").Select("MAX(number)").Row()
 	err = row.Scan(&result)
-	if err!=nil {
+	if err != nil {
 		return -1, err
 	}
 
@@ -160,8 +167,9 @@ func (d *Database) GetNextInvoiceNumber() (int, error) {
 }
 
 func (d *Database) getDatabase() (*gorm.DB, error) {
+	databaseName:=d.GetDatabaseName()
 	if d.db == nil {
-		var connectionString = fmt.Sprintf("per:KnaskimGjwQ6M!@tcp(192.168.1.3:3306)/%s?parseTime=True", DatabaseName)
+		var connectionString = fmt.Sprintf("per:KnaskimGjwQ6M!@tcp(192.168.1.3:3306)/%s?parseTime=True", databaseName)
 		db, err := gorm.Open("mysql", connectionString)
 		if err != nil {
 			return nil, err
@@ -178,4 +186,12 @@ func (d *Database) CloseDatabase() {
 	d.db.Close()
 	d.db = nil
 	return
+}
+
+func (d *Database) GetDatabaseName() string {
+	if d.UseTestDatabase {
+		return DatabaseNameTest
+	} else {
+		return DatabaseName
+	}
 }
