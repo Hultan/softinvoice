@@ -169,7 +169,7 @@ func (d *Database) GetNextInvoiceNumber() (int, error) {
 func (d *Database) getDatabase() (*gorm.DB, error) {
 	databaseName:=d.GetDatabaseName()
 	if d.db == nil {
-		var connectionString = fmt.Sprintf("per:KnaskimGjwQ6M!@tcp(192.168.1.3:3306)/%s?parseTime=True", databaseName)
+		var connectionString = fmt.Sprintf("per:KnaskimGjwQ6M!@tcp(192.168.1.5:3306)/%s?parseTime=True", databaseName)
 		db, err := gorm.Open("mysql", connectionString)
 		if err != nil {
 			return nil, err

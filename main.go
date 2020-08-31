@@ -1,12 +1,12 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gotk3/gotk3/glib"
 	"github.com/gotk3/gotk3/gtk"
 	"os"
-	"strings"
 )
 
 const (
@@ -15,16 +15,19 @@ const (
 )
 
 var (
-	useTestDatabase bool = false
+	useTestDatabase = false
 )
 
 func main() {
+	useTestDatabase = *flag.Bool("t",false, "Use testing database")
+	flag.Parse()
+
 	// Check command line arguments
-	if len(os.Args) > 1 {
-		if strings.HasPrefix(os.Args[1],"-t") {
-			useTestDatabase = true
-		}
-	}
+	//if len(os.Args) > 1 {
+	//	if strings.HasPrefix(os.Args[1],"-t") {
+	//		useTestDatabase = true
+	//	}
+	//}
 
 	// Create a new application
 	app, err := gtk.ApplicationNew(ApplicationId, ApplicationFlags)
