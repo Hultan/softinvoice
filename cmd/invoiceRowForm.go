@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/gotk3/gotk3/glib"
 	"github.com/gotk3/gotk3/gtk"
-	"github.com/hultan/softteam-invoice/database"
+	"github.com/hultan/softteam-invoice/internal/database"
 	"strconv"
 )
 
@@ -51,28 +51,31 @@ func (i *InvoiceRowForm) OpenInvoiceRowForm(softInvoice *SoftInvoice, saveCallba
 		window.SetPosition(gtk.WIN_POS_CENTER_ALWAYS)
 
 		// Hook up the hide event
-		window.Connect("hide", func() {
-			i.CloseInvoiceRowWindow(softInvoice)
+		_, err = window.Connect("hide", func() {
+			i.CloseInvoiceRowWindow()
 		})
+		errorCheck(err)
 
 		// Get the cancel button
 		cancelButton, err := softInvoice.helper.GetButton("productcancel_button")
 		errorCheck(err)
 
 		// Hook up the clicked event for the cancel button
-		cancelButton.Connect("clicked", func() {
+		_, err = cancelButton.Connect("clicked", func() {
 			window.Hide()
 		})
+		errorCheck(err)
 
 		// Get the save button
 		saveButton, err := softInvoice.helper.GetButton("productsave_button")
 		errorCheck(err)
 
 		// Hook up the clicked event for the save button
-		saveButton.Connect("clicked", func() {
+		_, err = saveButton.Connect("clicked", func() {
 			isSavingRow = true
 			window.Hide()
 		})
+		errorCheck(err)
 
 		// Setup window
 		i.SetupWindow(softInvoice)
@@ -87,7 +90,7 @@ func (i *InvoiceRowForm) OpenInvoiceRowForm(softInvoice *SoftInvoice, saveCallba
 	softInvoice.invoiceRowForm.window.ShowAll()
 }
 
-func (i *InvoiceRowForm) CloseInvoiceRowWindow(softInvoice *SoftInvoice) {
+func (i *InvoiceRowForm) CloseInvoiceRowWindow() {
 	if isSavingRow {
 		isSavingRow = false
 		row := i.SaveInvoiceRow()
@@ -146,9 +149,11 @@ func (i *InvoiceRowForm) SetupProductCombo(softInvoice *SoftInvoice) {
 
 	// Add product to a list store
 	productStore, err := gtk.ListStoreNew(glib.TYPE_INT, glib.TYPE_STRING, glib.TYPE_STRING)
+	errorCheck(err)
 	for _, value := range products {
 		iter := productStore.Append()
-		productStore.Set(iter, []int{0, 1, 2}, []interface{}{value.Id, value.Number, value.Name})
+		// Ignore errors here
+		_ = productStore.Set(iter, []int{0, 1, 2}, []interface{}{value.Id, value.Number, value.Name})
 	}
 
 	// Setup combo and renderer
@@ -161,14 +166,15 @@ func (i *InvoiceRowForm) SetupProductCombo(softInvoice *SoftInvoice) {
 	productCombo.PackStart(nameRenderer, true)
 	productCombo.AddAttribute(nameRenderer, "text", 2)
 
-	productCombo.Connect("changed", i.OnProductChange, softInvoice)
+	_, err = productCombo.Connect("changed", i.OnProductChange)
+	errorCheck(err)
 }
 
 //
 // Signal handlers
 //
 
-func (i *InvoiceRowForm) OnProductChange(customerCombo *gtk.ComboBox, softInvoice *SoftInvoice) {
+func (i *InvoiceRowForm) OnProductChange(customerCombo *gtk.ComboBox) {
 	// Get the id of the selected product
 	iter, _ := customerCombo.GetActiveIter()
 	model, _ := customerCombo.GetModel()
@@ -177,7 +183,7 @@ func (i *InvoiceRowForm) OnProductChange(customerCombo *gtk.ComboBox, softInvoic
 
 	// Find the selected product
 	var foundProduct database.Product
-	var found bool = false
+	var found = false
 
 	for _, value := range i.products {
 		if value.Id == id.(int) {

@@ -21,7 +21,7 @@ type Invoice struct {
 	CreditInvoiceNumber   sql.NullInt32 `gorm:"column:creditinvoicenumber;default:null"`
 	ReadOnly              bool          `gorm:"column:readonly;default:false"`
 
-	Rows []InvoiceRow //`gorm:"foreignkey:Id"`
+	Rows []InvoiceRow
 }
 
 func (i *Invoice) TableName() string {

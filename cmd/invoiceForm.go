@@ -6,7 +6,7 @@ import (
 	"github.com/davecgh/go-spew/spew"
 	"github.com/gotk3/gotk3/glib"
 	"github.com/gotk3/gotk3/gtk"
-	"github.com/hultan/softteam-invoice/database"
+	"github.com/hultan/softteam-invoice/internal/database"
 	"github.com/hultan/softteam/messagebox"
 	"strconv"
 	"time"
@@ -64,37 +64,41 @@ func (i *InvoiceForm) OpenInvoiceForm(softInvoice *SoftInvoice, reloadListCallba
 		window.SetPosition(gtk.WIN_POS_CENTER_ALWAYS)
 
 		// Hook up the hide event
-		window.Connect("hide", func() {
+		_,err = window.Connect("hide", func() {
 			i.CloseInvoiceWindow(softInvoice)
 		})
+		errorCheck(err)
 
 		// Get the cancel button
 		cancelButton, err := softInvoice.helper.GetButton("cancel_button")
 		errorCheck(err)
 
 		// Hook up the clicked event for the cancel button
-		cancelButton.Connect("clicked", func() {
+		_,err = cancelButton.Connect("clicked", func() {
 			window.Hide()
 		})
+		errorCheck(err)
 
 		// Get the save button
 		saveButton, err := softInvoice.helper.GetButton("save_button")
 		errorCheck(err)
 
 		// Hook up the clicked event for the save button
-		saveButton.Connect("clicked", func() {
+		_, err = saveButton.Connect("clicked", func() {
 			isSaving = true
 			window.Hide()
 		})
+		errorCheck(err)
 
 		// Get the add button
 		addButton, err := softInvoice.helper.GetButton("addrow_button")
 		errorCheck(err)
 
 		// Hook up the clicked event for the add row button
-		addButton.Connect("clicked", func() {
+		_, err = addButton.Connect("clicked", func() {
 			softInvoice.invoiceRowForm.OpenInvoiceRowForm(softInvoice, i.OnInvoiceRowAdded)
 		})
+		errorCheck(err)
 
 		// Get row treeview
 		treeview, err := softInvoice.helper.GetTreeView("invoicerow_treeview")
@@ -136,7 +140,8 @@ func (i *InvoiceForm) CloseInvoiceWindow(softInvoice *SoftInvoice) {
 		// Save the new invoice
 		i.SaveInvoice(softInvoice)
 		// Make sure the main form reloads the list of invoices
-		i.reloadListCallback(softInvoice)
+		err := i.reloadListCallback(softInvoice)
+		errorCheck(err)
 	}
 }
 
@@ -196,11 +201,10 @@ func (i *InvoiceForm) SetupWindow(softInvoice *SoftInvoice) {
 
 	// Get calendar entry
 	calendar, err := softInvoice.helper.GetCalendar("calendar")
-	if err != nil {
-		fmt.Println("Failed to get calendar : ", err.Error())
-	}
+	errorCheck(err)
 	i.calendar = calendar
-	calendar.Connect("day-selected", i.OnCalendarDateChanged)
+	_, err = calendar.Connect("day-selected", i.OnCalendarDateChanged)
+	errorCheck(err)
 }
 
 func (i *InvoiceForm) SetupCustomerCombo(softInvoice *SoftInvoice) {
@@ -218,11 +222,16 @@ func (i *InvoiceForm) SetupCustomerCombo(softInvoice *SoftInvoice) {
 	}
 	i.customers = customers
 
+	var iter *gtk.TreeIter
 	// Add customers to a list store
 	customerStore, err := gtk.ListStoreNew(glib.TYPE_INT, glib.TYPE_STRING, glib.TYPE_STRING)
+	errorCheck(err)
 	for _, value := range customers {
-		iter := customerStore.Append()
-		customerStore.Set(iter, []int{0, 1, 2}, []interface{}{value.Id, value.Number, value.Name})
+		iter = customerStore.Append()
+		if iter!=nil {
+			// Don't add customer on error
+			_ = customerStore.Set(iter, []int{0, 1, 2}, []interface{}{value.Id, value.Number, value.Name})
+		}
 	}
 
 	// Setup combo and renderer
@@ -236,14 +245,15 @@ func (i *InvoiceForm) SetupCustomerCombo(softInvoice *SoftInvoice) {
 	customerCombo.AddAttribute(nameRenderer, "text", 2)
 
 	// Hook up customer change signal
-	customerCombo.Connect("changed", i.OnCustomerChange, softInvoice)
+	_, err = customerCombo.Connect("changed", i.OnCustomerChange)
+	errorCheck(err)
 }
 
 //
 // Signal handlers
 //
 
-func (i *InvoiceForm) OnCustomerChange(customerCombo *gtk.ComboBox, softInvoice *SoftInvoice) {
+func (i *InvoiceForm) OnCustomerChange(customerCombo *gtk.ComboBox) {
 	// Get the id of the selected row
 	iter, _ := customerCombo.GetActiveIter()
 	model, _ := customerCombo.GetModel()
@@ -252,7 +262,7 @@ func (i *InvoiceForm) OnCustomerChange(customerCombo *gtk.ComboBox, softInvoice 
 
 	// Loop through customers and find the selected one
 	var foundCustomer database.Customer
-	var found bool = false
+	var found = false
 
 	for _, value := range i.customers {
 		if value.Id == id.(int) {
@@ -360,7 +370,8 @@ func (i *InvoiceForm) AddInvoiceRow(invoiceRow *database.InvoiceRow) {
 	i.invoiceRowTreeview.SetModel(nil)
 
 	iter := i.rowListStore.Append()
-	i.rowListStore.Set(iter, []int{0, 1, 2, 3, 4}, []interface{}{
+	// Ignore errors here
+	_ = i.rowListStore.Set(iter, []int{0, 1, 2, 3, 4}, []interface{}{
 		invoiceRow.Text,
 		invoiceRow.Name,
 		strconv.FormatFloat(float64(invoiceRow.Price),'f',2,32),

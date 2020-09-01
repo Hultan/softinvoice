@@ -2,8 +2,8 @@ package main
 
 import (
 	"github.com/gotk3/gotk3/gtk"
-	"github.com/hultan/softteam-invoice/database"
-	gtkhelper "github.com/hultan/softteam/gtk"
+	"github.com/hultan/softteam-invoice/internal/database"
+	gtkHelper "github.com/hultan/softteam/gtk"
 )
 
 // The SoftInvoice application type
@@ -13,13 +13,13 @@ type SoftInvoice struct {
 	invoiceForm    *InvoiceForm
 	invoiceRowForm *InvoiceRowForm
 	previewWForm   *PreviewForm
-	helper         *gtkhelper.GtkHelper
+	helper         *gtkHelper.GtkHelper
 
-	database       *database.Database
+	database        *database.Database
 }
 
 // Create a new SoftInvoice object
-func NewSoftInvoice(app *gtk.Application) *SoftInvoice {
+func NewSoftInvoice(app *gtk.Application, useTestDatabase bool) *SoftInvoice {
 	softInvoice := new(SoftInvoice)
 	softInvoice.invoiceForm = NewInvoiceForm()
 	softInvoice.invoiceRowForm = NewInvoiceRowForm()

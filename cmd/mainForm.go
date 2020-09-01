@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"github.com/gotk3/gotk3/glib"
 	"github.com/gotk3/gotk3/gtk"
-	"github.com/hultan/softteam-invoice/database"
-	gtkhelper "github.com/hultan/softteam/gtk"
+	"github.com/hultan/softteam-invoice/internal/database"
+	gtkHelper "github.com/hultan/softteam/gtk"
 	"os"
 	"strconv"
 )
@@ -28,7 +28,7 @@ func (m *MainForm) OpenMainForm(app *gtk.Application, softInvoice *SoftInvoice) 
 	gtk.Init(&os.Args)
 
 	// Create a new gtk helper
-	softInvoice.helper = gtkhelper.GtkHelperNewFromFile("main.glade")
+	softInvoice.helper = gtkHelper.GtkHelperNewFromFile("main.glade")
 	if softInvoice.helper==nil {
 		panic("glade file not found!")
 	}
@@ -45,23 +45,23 @@ func (m *MainForm) OpenMainForm(app *gtk.Application, softInvoice *SoftInvoice) 
 	window.SetDefaultSize(1024, 768)
 
 	// Hook up the destroy event
-	window.Connect("destroy", func() {
+	_, err = window.Connect("destroy", func() {
 		m.CloseMainForm(softInvoice)
 	})
+	errorCheck(err)
 
 	// Get the new invoice button
 	button, err := softInvoice.helper.GetToolButton("newinvoice_button")
 	errorCheck(err)
 
 	// Hook up the clicked event for the new invoice button
-	button.Connect("clicked", func() {
+	_, err = button.Connect("clicked", func() {
 		softInvoice.invoiceForm.OpenInvoiceForm(softInvoice, m.LoadInvoiceList)
 	})
+	errorCheck(err)
 
 	err = m.LoadInvoiceList(softInvoice)
-	if err != nil {
-		errorCheck(err)
-	}
+	errorCheck(err)
 
 	m.popupMenu = NewPopupMenu(softInvoice, m)
 
@@ -103,7 +103,7 @@ func (m *MainForm) LoadInvoiceList(softInvoice *SoftInvoice) error {
 	// Fill list store
 	for _, invoice := range invoices {
 		iter := listStore.Append()
-		listStore.Set(iter, []int{0, 1, 2, 3, 4, 5}, []interface{}{
+		_ = listStore.Set(iter, []int{0, 1, 2, 3, 4, 5}, []interface{}{
 			fmt.Sprintf("%d", invoice.Number),
 			invoice.Date.Format(constDateLayout),
 			invoice.DueDate.Format(constDateLayout),
@@ -114,7 +114,8 @@ func (m *MainForm) LoadInvoiceList(softInvoice *SoftInvoice) error {
 
 	// Set model and hook up row activated signal
 	treeView.SetModel(listStore)
-	treeView.Connect("row_activated", m.OnInvoiceClicked, softInvoice)
+	_, err = treeView.Connect("row_activated", m.OnInvoiceClicked, softInvoice)
+	errorCheck(err)
 
 	return nil
 }
@@ -123,7 +124,7 @@ func (m *MainForm) LoadInvoiceList(softInvoice *SoftInvoice) error {
 // Signal handlers
 //
 
-func (m *MainForm) OnInvoiceClicked(treeView *gtk.TreeView, path *gtk.TreePath, column *gtk.TreeViewColumn, softInvoice *SoftInvoice) {
+func (m *MainForm) OnInvoiceClicked(treeView *gtk.TreeView, softInvoice *SoftInvoice) {
 	invoice := m.GetSelectedInvoice(treeView)
 	if invoice == nil {
 		return
@@ -145,7 +146,7 @@ func (m *MainForm) GetSelectedInvoice(treeView *gtk.TreeView) *database.Invoice 
 	}
 	model, iter, ok := selection.GetSelected()
 	if ok {
-		value, err := model.(*gtk.TreeModel).GetValue(iter, liststoreColumnInvoiceNumber)
+		value, err := model.(*gtk.TreeModel).GetValue(iter, listStoreColumnInvoiceNumber)
 		if err != nil {
 			return nil
 		}

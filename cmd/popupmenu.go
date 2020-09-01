@@ -3,7 +3,7 @@ package main
 import (
 	"github.com/gotk3/gotk3/gdk"
 	"github.com/gotk3/gotk3/gtk"
-	"github.com/hultan/softteam-invoice/database"
+	"github.com/hultan/softteam-invoice/internal/database"
 	"strconv"
 )
 
@@ -25,14 +25,15 @@ func NewPopupMenu(softInvoice *SoftInvoice, mainWindow *MainForm) *PopupMenu {
 	pdf, err := softInvoice.helper.GetMenuItem("popupMenuItemSaveAsPDF")
 	errorCheck(err)
 
-	mainWindow.treeView.Connect("button-release-event", func(treeview *gtk.TreeView, event *gdk.Event) {
+	_, err = mainWindow.treeView.Connect("button-release-event", func(treeview *gtk.TreeView, event *gdk.Event) {
 		buttonEvent := gdk.EventButtonNewFromEvent(event)
 		if buttonEvent.Button() == 3 { // 3 == Mouse right button!?
 			popup.PopupAtPointer(event)
 		}
 	})
+	errorCheck(err)
 
-	preview.Connect("activate", func() {
+	_, err = preview.Connect("activate", func() {
 		invoice := menu.getSelectedInvoice(mainWindow.treeView)
 		if invoice == nil {
 			return
@@ -40,8 +41,9 @@ func NewPopupMenu(softInvoice *SoftInvoice, mainWindow *MainForm) *PopupMenu {
 
 		softInvoice.previewWForm.OpenPreviewForm(softInvoice, invoice)
 	})
+	errorCheck(err)
 
-	pdf.Connect("activate", func() {
+	_, err = pdf.Connect("activate", func() {
 		invoice := menu.getSelectedInvoice(mainWindow.treeView)
 		if invoice == nil {
 			return
@@ -59,6 +61,8 @@ func NewPopupMenu(softInvoice *SoftInvoice, mainWindow *MainForm) *PopupMenu {
 
 		dialog.Destroy()
 	})
+	errorCheck(err)
+
 	return menu
 }
 
@@ -69,7 +73,7 @@ func (p *PopupMenu) getSelectedInvoice(treeView *gtk.TreeView) *database.Invoice
 	}
 	model, iter, ok := selection.GetSelected()
 	if ok {
-		value, err := model.(*gtk.TreeModel).GetValue(iter, liststoreColumnInvoiceNumber)
+		value, err := model.(*gtk.TreeModel).GetValue(iter, listStoreColumnInvoiceNumber)
 		if err != nil {
 			return nil
 		}

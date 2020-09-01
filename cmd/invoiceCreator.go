@@ -5,7 +5,7 @@ import (
 	"github.com/gotk3/gotk3/cairo"
 	"github.com/gotk3/gotk3/gdk"
 	"github.com/gotk3/gotk3/gtk"
-	"github.com/hultan/softteam-invoice/database"
+	"github.com/hultan/softteam-invoice/internal/database"
 	"github.com/hultan/softteam/resources"
 	"github.com/jung-kurt/gofpdf"
 	"golang.org/x/text/language"
@@ -34,12 +34,11 @@ func (i *InvoiceCreator) CreatePDF(path string) {
 	pdf.Image(imagePath,0,0,200,287,false,"",0,"")
 
 	err := pdf.OutputFileAndClose(path)
-	if err!=nil {
-		panic(err)
-	}
+	errorCheck(err)
 
 	// Clean up image
-	os.Remove(imagePath)
+	err = os.Remove(imagePath)
+	errorCheck(err)
 }
 
 func (i *InvoiceCreator) CreatePNG() (*gdk.Pixbuf, string) {
@@ -77,7 +76,10 @@ func (i *InvoiceCreator) CreatePNG() (*gdk.Pixbuf, string) {
 
 	// Save the image
 	file, err := ioutil.TempFile("/tmp","se_softteam_invoice_*.png")
-	surface.WriteToPNG(file.Name())
+	errorCheck(err)
+	err = surface.WriteToPNG(file.Name())
+	errorCheck(err)
+
 	returnImage, err :=gdk.PixbufNewFromFile(file.Name())
 
 	// Clean up

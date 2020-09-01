@@ -5,7 +5,6 @@ package database
 // Crap! Use gorm instead!
 
 import (
-	//	"github.com/jmoiron/sqlx"
 	"fmt"
 	"github.com/jinzhu/gorm"
 )
@@ -183,15 +182,15 @@ func (d *Database) CloseDatabase() {
 	if d.db == nil {
 		return
 	}
-	d.db.Close()
+	_ = d.db.Close()
 	d.db = nil
 	return
 }
 
 func (d *Database) GetDatabaseName() string {
 	if d.UseTestDatabase {
-		return DatabaseNameTest
+		return constDatabaseNameTest
 	} else {
-		return DatabaseName
+		return constDatabaseName
 	}
 }

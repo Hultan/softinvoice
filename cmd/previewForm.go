@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/gotk3/gotk3/gtk"
-	"github.com/hultan/softteam-invoice/database"
+	"github.com/hultan/softteam-invoice/internal/database"
 	"os"
 )
 
@@ -33,9 +33,10 @@ func (p *PreviewForm) OpenPreviewForm(softInvoice *SoftInvoice, invoice *databas
 		window.SetPosition(gtk.WIN_POS_CENTER_ALWAYS)
 
 		// Hook up the hide event
-		window.Connect("hide", func() {
+		_, err = window.Connect("hide", func() {
 			p.ClosePreviewWindow()
 		})
+		errorCheck(err)
 
 		// Show the window
 		window.ShowAll()
@@ -49,11 +50,12 @@ func (p *PreviewForm) OpenPreviewForm(softInvoice *SoftInvoice, invoice *databas
 		panic(err)
 	}
 	creator := NewInvoiceCreator(invoice)
-	pixbuf, path := creator.CreatePNG()
-	image.SetFromPixbuf(pixbuf)
+	pixBuf, path := creator.CreatePNG()
+	image.SetFromPixbuf(pixBuf)
 
 	// Clean up image
-	os.Remove(path)
+	err = os.Remove(path)
+	errorCheck(err)
 }
 
 func (p *PreviewForm) ClosePreviewWindow() {
