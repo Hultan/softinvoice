@@ -880,6 +880,10 @@
       <object class="GtkGrid">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
+        <property name="margin_start">10</property>
+        <property name="margin_end">10</property>
+        <property name="margin_top">10</property>
+        <property name="margin_bottom">10</property>
         <child>
           <object class="GtkLabel">
             <property name="visible">True</property>
@@ -991,28 +995,42 @@
           </packing>
         </child>
         <child>
-          <object class="GtkButton" id="productcancel_button">
-            <property name="label" translatable="yes">Cancel</property>
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
-          </object>
-          <packing>
-            <property name="left_attach">3</property>
-            <property name="top_attach">5</property>
-          </packing>
-        </child>
-        <child>
           <object class="GtkButton" id="productsave_button">
             <property name="label" translatable="yes">Save</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
+            <property name="margin_top">10</property>
           </object>
           <packing>
             <property name="left_attach">2</property>
-            <property name="top_attach">5</property>
+            <property name="top_attach">6</property>
           </packing>
+        </child>
+        <child>
+          <object class="GtkButton" id="productcancel_button">
+            <property name="label" translatable="yes">Cancel</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="margin_top">10</property>
+          </object>
+          <packing>
+            <property name="left_attach">3</property>
+            <property name="top_attach">6</property>
+          </packing>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
         </child>
         <child>
           <placeholder/>

@@ -6,6 +6,7 @@ import (
 	"github.com/gotk3/gotk3/gtk"
 	"github.com/hultan/softteam-invoice/internal/database"
 	"strconv"
+	"strings"
 )
 
 type SaveCallback func(*database.InvoiceRow)
@@ -49,6 +50,7 @@ func (i *InvoiceRowForm) OpenInvoiceRowForm(softInvoice *SoftInvoice, saveCallba
 		window.SetModal(true)
 		window.SetKeepAbove(true)
 		window.SetPosition(gtk.WIN_POS_CENTER_ALWAYS)
+		window.SetTransientFor(softInvoice.invoiceForm.window)
 
 		// Hook up the hide event
 		_, err = window.Connect("hide", func() {
@@ -221,6 +223,7 @@ func (i *InvoiceRowForm) SaveInvoiceRow() *database.InvoiceRow {
 
 	// Get and parse the amount field
 	amountString, _ := i.amountEntry.GetText()
+	amountString = strings.Replace(amountString,",",".", 1)
 	amount, _ := strconv.ParseFloat(amountString, 32)
 	row.Amount = float32(amount)
 
