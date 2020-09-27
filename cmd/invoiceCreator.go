@@ -5,7 +5,7 @@ import (
 	"github.com/gotk3/gotk3/cairo"
 	"github.com/gotk3/gotk3/gdk"
 	"github.com/gotk3/gotk3/gtk"
-	"github.com/hultan/softteam-invoice/internal/database"
+	"github.com/hultan/softinvoice/internal/database"
 	"github.com/hultan/softteam/resources"
 	"github.com/jung-kurt/gofpdf"
 	"golang.org/x/text/language"

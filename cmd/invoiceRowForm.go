@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/gotk3/gotk3/glib"
 	"github.com/gotk3/gotk3/gtk"
-	"github.com/hultan/softteam-invoice/internal/database"
+	"github.com/hultan/softinvoice/internal/database"
 	"strconv"
 	"strings"
 )

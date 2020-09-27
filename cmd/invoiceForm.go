@@ -6,7 +6,7 @@ import (
 	"github.com/davecgh/go-spew/spew"
 	"github.com/gotk3/gotk3/glib"
 	"github.com/gotk3/gotk3/gtk"
-	"github.com/hultan/softteam-invoice/internal/database"
+	"github.com/hultan/softinvoice/internal/database"
 	"github.com/hultan/softteam/messagebox"
 	"strconv"
 	"time"

@@ -3,7 +3,7 @@ package main
 import (
 	"github.com/gotk3/gotk3/gdk"
 	"github.com/gotk3/gotk3/gtk"
-	"github.com/hultan/softteam-invoice/internal/database"
+	"github.com/hultan/softinvoice/internal/database"
 	"strconv"
 )
 
