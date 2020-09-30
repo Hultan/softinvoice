@@ -15,6 +15,8 @@ github.com/hultan/softteam v0.1.2 h1:fw7tA7nDxMvpgAjFEckYXYKhTE7xBcSlU0RuxhcRve4
 github.com/hultan/softteam v0.1.2/go.mod h1:QEXMKw8q+S4qRoL0REfFtTa9e8d8Kj9KHFq/U2skAPY=
 github.com/hultan/softteam-tools v1.2.0 h1:J0ZS2BOUHJBfwH02NsQoO5/inj/vsPaJDV7FBUdy+TU=
 github.com/hultan/softteam-tools v1.2.0/go.mod h1:PxNInslnmARlAlqpYK/DhUGndmWVRU8HAh/Ir8RL9mI=
+github.com/hultan/softteam-tools v1.2.2 h1:3K80JRsMP6+UgYUtg0SirVYeZPDz7gTms9oIQKCVLQ4=
+github.com/hultan/softteam-tools v1.2.2/go.mod h1:PxNInslnmARlAlqpYK/DhUGndmWVRU8HAh/Ir8RL9mI=
 github.com/jinzhu/gorm v1.9.16 h1:+IyIjPEABKRpsu/F8OvDPy9fyQlgsg2luMV2ZIH5i5o=
 github.com/jinzhu/gorm v1.9.16/go.mod h1:G3LB3wezTOWM2ITLzPxEXgSkOXAntiLHS7UdBefADcs=
 github.com/jinzhu/inflection v1.0.0 h1:K317FqzuhWc8YvSVlFMCCUb36O/S9MCKRDI7QkRKD/E=

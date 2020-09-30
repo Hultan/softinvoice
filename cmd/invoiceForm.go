@@ -7,7 +7,7 @@ import (
 	"github.com/gotk3/gotk3/glib"
 	"github.com/gotk3/gotk3/gtk"
 	"github.com/hultan/softinvoice/internal/database"
-	"github.com/hultan/softteam/messagebox"
+	"github.com/hultan/softteam-tools/pkg/messagebox"
 	"strconv"
 	"time"
 )
