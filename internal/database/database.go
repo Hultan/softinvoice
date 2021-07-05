@@ -1,9 +1,5 @@
 package database
 
-// https://github.com/jmoiron/sqlx	: Querying
-// https://github.com/jmoiron/modl	: Inserts and updates
-// Crap! Use gorm instead!
-
 import (
 	"fmt"
 	"github.com/jinzhu/gorm"
