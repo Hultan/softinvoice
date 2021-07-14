@@ -31,7 +31,7 @@ func (i *InvoiceCreator) CreatePDF(path string) {
 	pdf.AddPage()
 	//pdf.SetFont("Arial", "B", 16)
 	//pdf.Cell(40, 10, "Hello world!!!")
-	pdf.Image(imagePath,0,0,200,287,false,"",0,"")
+	pdf.Image(imagePath,15,30,180,247,false,"",0,"")
 
 	err := pdf.OutputFileAndClose(path)
 	errorCheck(err)
