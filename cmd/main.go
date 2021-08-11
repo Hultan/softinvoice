@@ -13,6 +13,8 @@ const (
 	ApplicationFlags = glib.APPLICATION_FLAGS_NONE
 )
 
+var softInvoice *SoftInvoice
+
 func main() {
 	// Parse command line arguments
 	useTestDatabasePointer := flag.Bool("test",false, "Use testing database")
@@ -23,12 +25,11 @@ func main() {
 	errorCheck(err)
 
 	// Create the SoftInvoice application object
-	softInvoice := NewSoftInvoice(app, *useTestDatabasePointer)
+	softInvoice = NewSoftInvoice(app, *useTestDatabasePointer)
 	softInvoice.mainForm = NewMainForm()
 
 	// Hook up the activate event handler
-	_, err = app.Connect("activate", softInvoice.mainForm.OpenMainForm, softInvoice)
-	errorCheck(err)
+	_ = app.Connect("activate", softInvoice.mainForm.OpenMainForm)
 
 	// Start the application (and exit when it is done)
 	os.Exit(app.Run(nil))

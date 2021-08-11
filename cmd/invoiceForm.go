@@ -7,7 +7,6 @@ import (
 	"github.com/gotk3/gotk3/glib"
 	"github.com/gotk3/gotk3/gtk"
 	"github.com/hultan/softinvoice/internal/database"
-	"github.com/hultan/softteam-tools/pkg/messagebox"
 	"strconv"
 	"time"
 )
@@ -43,15 +42,14 @@ func NewInvoiceForm() *InvoiceForm {
 	return invoiceForm
 }
 
-func (i *InvoiceForm) OpenInvoiceForm(softInvoice *SoftInvoice, reloadListCallback ReloadListCallback) {
+func (i *InvoiceForm) OpenInvoiceForm(reloadListCallback ReloadListCallback) {
 	var err error
 	i.reloadListCallback = reloadListCallback
 
 	// Check if it is the first time we open the invoice window
 	if softInvoice.invoiceForm.window == nil {
 		// Get the invoice window from glade
-		window, err := softInvoice.helper.GetWindow("invoice_window")
-		errorCheck(err)
+		window := softInvoice.builder.GetObject("invoice_window").(*gtk.Window)
 
 		// Save a pointer to the invoice window
 		softInvoice.invoiceForm.window = window
@@ -64,45 +62,37 @@ func (i *InvoiceForm) OpenInvoiceForm(softInvoice *SoftInvoice, reloadListCallba
 		window.SetPosition(gtk.WIN_POS_CENTER_ALWAYS)
 
 		// Hook up the hide event
-		_,err = window.Connect("hide", func() {
+		_ = window.Connect("hide", func() {
 			i.CloseInvoiceWindow(softInvoice)
 		})
-		errorCheck(err)
 
 		// Get the cancel button
-		cancelButton, err := softInvoice.helper.GetButton("cancel_button")
-		errorCheck(err)
+		cancelButton := softInvoice.builder.GetObject("cancel_button").(*gtk.Button)
 
 		// Hook up the clicked event for the cancel button
-		_,err = cancelButton.Connect("clicked", func() {
+		_ = cancelButton.Connect("clicked", func() {
 			window.Hide()
 		})
-		errorCheck(err)
 
 		// Get the save button
-		saveButton, err := softInvoice.helper.GetButton("save_button")
-		errorCheck(err)
+		saveButton := softInvoice.builder.GetObject("save_button").(*gtk.Button)
 
 		// Hook up the clicked event for the save button
-		_, err = saveButton.Connect("clicked", func() {
+		_ = saveButton.Connect("clicked", func() {
 			isSaving = true
 			window.Hide()
 		})
-		errorCheck(err)
 
 		// Get the add button
-		addButton, err := softInvoice.helper.GetButton("addrow_button")
-		errorCheck(err)
+		addButton := softInvoice.builder.GetObject("addrow_button").(*gtk.Button)
 
 		// Hook up the clicked event for the add row button
-		_, err = addButton.Connect("clicked", func() {
+		_ = addButton.Connect("clicked", func() {
 			softInvoice.invoiceRowForm.OpenInvoiceRowForm(softInvoice, i.OnInvoiceRowAdded)
 		})
-		errorCheck(err)
 
 		// Get row treeview
-		treeview, err := softInvoice.helper.GetTreeView("invoicerow_treeview")
-		errorCheck(err)
+		treeview := softInvoice.builder.GetObject("invoicerow_treeview").(*gtk.TreeView)
 		i.invoiceRowTreeview = treeview
 	}
 
@@ -151,68 +141,42 @@ func (i *InvoiceForm) CloseInvoiceWindow(softInvoice *SoftInvoice) {
 
 func (i *InvoiceForm) SetupWindow(softInvoice *SoftInvoice) {
 	// Get name entry
-	nameEntry, err := softInvoice.helper.GetEntry("name_entry")
-	if err != nil {
-		fmt.Println("Failed to get name entry : ", err.Error())
-	}
+	nameEntry := softInvoice.builder.GetObject("name_entry").(*gtk.Entry)
 	i.nameEntry = nameEntry
 
 	// Get address entry
-	addressEntry, err := softInvoice.helper.GetEntry("address_entry")
-	if err != nil {
-		fmt.Println("Failed to get address entry : ", err.Error())
-	}
+	addressEntry := softInvoice.builder.GetObject("address_entry").(*gtk.Entry)
 	i.addressEntry = addressEntry
 
 	// Get postal address entry
-	postalAddressEntry, err := softInvoice.helper.GetEntry("postaladdress_entry")
-	if err != nil {
-		fmt.Println("Failed to get postal address entry : ", err.Error())
-	}
+	postalAddressEntry := softInvoice.builder.GetObject("postaladdress_entry").(*gtk.Entry)
 	i.postalAddressEntry = postalAddressEntry
 
 	// Get payday entry
-	paydayEntry, err := softInvoice.helper.GetEntry("payday_entry")
-	if err != nil {
-		fmt.Println("Failed to get payday entry : ", err.Error())
-	}
+	paydayEntry := softInvoice.builder.GetObject("payday_entry").(*gtk.Entry)
 	i.paydayEntry = paydayEntry
 
 	// Get your reference entry
-	yourReferenceEntry, err := softInvoice.helper.GetEntry("yourreference_entry")
-	if err != nil {
-		fmt.Println("Failed to get your reference entry : ", err.Error())
-	}
+	yourReferenceEntry := softInvoice.builder.GetObject("yourreference_entry").(*gtk.Entry)
 	i.yourReferenceEntry = yourReferenceEntry
 
 	// Get invoice number entry
-	invoiceNumberEntry, err := softInvoice.helper.GetEntry("invoicenumber_entry")
-	if err != nil {
-		fmt.Println("Failed to get invoice number entry : ", err.Error())
-	}
+	invoiceNumberEntry := softInvoice.builder.GetObject("invoicenumber_entry").(*gtk.Entry)
 	i.invoiceNumberEntry = invoiceNumberEntry
 
 	// Get invoice date entry
-	invoiceDateEntry, err := softInvoice.helper.GetEntry("invoicedate_entry")
-	if err != nil {
-		fmt.Println("Failed to get invoice date entry : ", err.Error())
-	}
+	invoiceDateEntry := softInvoice.builder.GetObject("invoicedate_entry").(*gtk.Entry)
 	i.invoiceDateEntry = invoiceDateEntry
 
 	// Get calendar entry
-	calendar, err := softInvoice.helper.GetCalendar("calendar")
-	errorCheck(err)
+	calendar := softInvoice.builder.GetObject("calendar").(*gtk.Calendar)
 	i.calendar = calendar
-	_, err = calendar.Connect("day-selected", i.OnCalendarDateChanged)
-	errorCheck(err)
+	_ = calendar.Connect("day-selected", i.OnCalendarDateChanged)
 }
 
 func (i *InvoiceForm) SetupCustomerCombo(softInvoice *SoftInvoice) {
 	// Get customer combo
-	customerCombo, err := softInvoice.helper.GetComboBox("customer_combo")
-	if err != nil {
-		fmt.Println("Failed to get customer combobox : ", err.Error())
-	}
+	customerCombo := softInvoice.builder.GetObject("customer_combo").(*gtk.ComboBox)
 	i.customerCombo = customerCombo
 
 	// Get all customers from the database
@@ -245,8 +209,7 @@ func (i *InvoiceForm) SetupCustomerCombo(softInvoice *SoftInvoice) {
 	customerCombo.AddAttribute(nameRenderer, "text", 2)
 
 	// Hook up customer change signal
-	_, err = customerCombo.Connect("changed", i.OnCustomerChange)
-	errorCheck(err)
+	_ = customerCombo.Connect("changed", i.OnCustomerChange)
 }
 
 //
@@ -257,7 +220,7 @@ func (i *InvoiceForm) OnCustomerChange(customerCombo *gtk.ComboBox) {
 	// Get the id of the selected row
 	iter, _ := customerCombo.GetActiveIter()
 	model, _ := customerCombo.GetModel()
-	idValue, _ := model.GetValue(iter, 0)
+	idValue, _ := model.(*gtk.TreeModel).GetValue(iter, 0)
 	id, _ := idValue.GoValue()
 
 	// Loop through customers and find the selected one
@@ -303,7 +266,8 @@ func (i *InvoiceForm) OnCalendarDateChanged() {
 func (i *InvoiceForm) SaveInvoice(softInvoice *SoftInvoice) bool {
 	// Check that a customer has been selected
 	if i.customer.Number == "" {
-		messagebox.NewMessageBox("Missing customer...", "The invoice is missing a customer!", i.window)
+		messagebox := gtk.MessageDialogNew(i.window, gtk.DIALOG_MODAL, gtk.MESSAGE_ERROR, gtk.BUTTONS_OK, "The invoice is missing a customer!")
+		messagebox.Show()
 		panic("missing customer")
 	}
 

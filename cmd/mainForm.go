@@ -6,7 +6,7 @@ import (
 	"github.com/gotk3/gotk3/glib"
 	"github.com/gotk3/gotk3/gtk"
 	"github.com/hultan/softinvoice/internal/database"
-	gtkHelper "github.com/hultan/softteam-tools/pkg/gtk-helper"
+	"github.com/hultan/softteam/framework"
 	"os"
 	"strconv"
 )
@@ -23,44 +23,43 @@ func NewMainForm() *MainForm {
 	return mainForm
 }
 
-func (m *MainForm) OpenMainForm(app *gtk.Application, softInvoice *SoftInvoice) {
+func (m *MainForm) OpenMainForm(app *gtk.Application) {
 	// Initialize gtk
 	gtk.Init(&os.Args)
 
 	// Create a new gtk helper
-	softInvoice.helper = gtkHelper.GtkHelperNewFromFile("main.glade")
-	if softInvoice.helper==nil {
+	fw := framework.NewFramework()
+
+	builder, err := fw.Gtk.CreateBuilder("main.glade")
+	if err!=nil {
 		panic("glade file not found!")
 	}
+	softInvoice.builder = builder
 
 	// Get the main window from the glade file
-	window, err := softInvoice.helper.GetApplicationWindow("main_window")
-	errorCheck(err)
+	window := softInvoice.builder.GetObject("main_window").(*gtk.ApplicationWindow)
 	m.window = window
 
 	// Set up main window
 	window.SetApplication(app)
-	title := fmt.Sprintf("SoftInvoice - [Database : %s]", softInvoice.database.GetDatabaseName())
+	title := fmt.Sprintf("%s - %s - [Database : %s]", applicationName, applicationVersion, softInvoice.database.GetDatabaseName())
 	window.SetTitle(title)
 	window.SetDefaultSize(1024, 768)
 
 	// Hook up the destroy event
-	_, err = window.Connect("destroy", func() {
-		m.CloseMainForm(softInvoice)
+	_ = window.Connect("destroy", func() {
+		m.CloseMainForm()
 	})
-	errorCheck(err)
 
 	// Get the new invoice button
-	button, err := softInvoice.helper.GetToolButton("newinvoice_button")
-	errorCheck(err)
+	button := softInvoice.builder.GetObject("newinvoice_button").(*gtk.ToolButton)
 
 	// Hook up the clicked event for the new invoice button
-	_, err = button.Connect("clicked", func() {
-		softInvoice.invoiceForm.OpenInvoiceForm(softInvoice, m.LoadInvoiceList)
+	_ = button.Connect("clicked", func() {
+		softInvoice.invoiceForm.OpenInvoiceForm(nil)
 	})
-	errorCheck(err)
 
-	err = m.LoadInvoiceList(softInvoice)
+	err = m.LoadInvoiceList()
 	errorCheck(err)
 
 	m.popupMenu = NewPopupMenu(softInvoice, m)
@@ -69,11 +68,11 @@ func (m *MainForm) OpenMainForm(app *gtk.Application, softInvoice *SoftInvoice) 
 	window.ShowAll()
 }
 
-func (m *MainForm) CloseMainForm(softInvoice *SoftInvoice) {
+func (m *MainForm) CloseMainForm() {
 	softInvoice.CleanUp()
 }
 
-func (m *MainForm) LoadInvoiceList(softInvoice *SoftInvoice) error {
+func (m *MainForm) LoadInvoiceList() error {
 	// Get all invoices from the database
 	invoices, err := softInvoice.database.GetAllInvoices()
 	if err != nil {
@@ -82,10 +81,7 @@ func (m *MainForm) LoadInvoiceList(softInvoice *SoftInvoice) error {
 	m.invoices = invoices
 
 	// Get the treeview from the builder
-	treeView, err := softInvoice.helper.GetTreeView("invoice_treeview")
-	if err != nil {
-		return err
-	}
+	treeView := softInvoice.builder.GetObject("invoice_treeview").(*gtk.TreeView)
 	m.treeView = treeView
 
 	// Create a new list store
@@ -114,8 +110,7 @@ func (m *MainForm) LoadInvoiceList(softInvoice *SoftInvoice) error {
 
 	// Set model and hook up row activated signal
 	treeView.SetModel(listStore)
-	_, err = treeView.Connect("row_activated", m.OnInvoiceClicked, softInvoice)
-	errorCheck(err)
+	_ = treeView.Connect("row_activated", m.OnInvoiceClicked)
 
 	return nil
 }

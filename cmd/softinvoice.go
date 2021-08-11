@@ -3,7 +3,7 @@ package main
 import (
 	"github.com/gotk3/gotk3/gtk"
 	"github.com/hultan/softinvoice/internal/database"
-	gtkHelper "github.com/hultan/softteam-tools/pkg/gtk-helper"
+	"github.com/hultan/softteam/framework"
 )
 
 // The SoftInvoice application type
@@ -13,7 +13,7 @@ type SoftInvoice struct {
 	invoiceForm    *InvoiceForm
 	invoiceRowForm *InvoiceRowForm
 	previewWForm   *PreviewForm
-	helper         *gtkHelper.GtkHelper
+	builder         *framework.GtkBuilder
 
 	database        *database.Database
 }

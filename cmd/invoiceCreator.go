@@ -6,7 +6,7 @@ import (
 	"github.com/gotk3/gotk3/gdk"
 	"github.com/gotk3/gotk3/gtk"
 	"github.com/hultan/softinvoice/internal/database"
-	"github.com/hultan/softteam-tools/pkg/resources"
+	"github.com/hultan/softteam/framework"
 	"github.com/jung-kurt/gofpdf"
 	"golang.org/x/text/language"
 	"golang.org/x/text/message"
@@ -43,8 +43,8 @@ func (i *InvoiceCreator) CreatePDF(path string) {
 
 func (i *InvoiceCreator) CreatePNG() (*gdk.Pixbuf, string) {
 	// Load the image
-	resource := new(resources.Resources)
-	filePath := resource.GetResourcePath("empty_invoice.png")
+	fw := framework.NewFramework()
+	filePath := fw.Resource.GetResourcePath("empty_invoice.png")
 	image, err :=gdk.PixbufNewFromFile(filePath)
 	if err!=nil {
 		panic(err)

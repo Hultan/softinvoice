@@ -19,8 +19,7 @@ func (p *PreviewForm) OpenPreviewForm(softInvoice *SoftInvoice, invoice *databas
 	// Check if it is the first time we open the preview window
 	if softInvoice.previewWForm.window==nil {
 		// Get the preview window from glade
-		window, err := softInvoice.helper.GetWindow("preview_window")
-		errorCheck(err)
+		window := softInvoice.builder.GetObject("preview_window").(*gtk.Window)
 
 		// Save a pointer to the preview window
 		softInvoice.previewWForm.window = window
@@ -33,10 +32,9 @@ func (p *PreviewForm) OpenPreviewForm(softInvoice *SoftInvoice, invoice *databas
 		window.SetPosition(gtk.WIN_POS_CENTER_ALWAYS)
 
 		// Hook up the hide event
-		_, err = window.Connect("hide", func() {
+		_ = window.Connect("hide", func() {
 			p.ClosePreviewWindow()
 		})
-		errorCheck(err)
 
 		// Show the window
 		window.ShowAll()
@@ -45,16 +43,13 @@ func (p *PreviewForm) OpenPreviewForm(softInvoice *SoftInvoice, invoice *databas
 		softInvoice.previewWForm.window.ShowAll()
 	}
 
-	image, err := softInvoice.helper.GetImage("invoice_preview")
-	if err!=nil {
-		panic(err)
-	}
+	image := softInvoice.builder.GetObject("invoice_preview").(*gtk.Image)
 	creator := NewInvoiceCreator(invoice)
 	pixBuf, path := creator.CreatePNG()
 	image.SetFromPixbuf(pixBuf)
 
 	// Clean up image
-	err = os.Remove(path)
+	err := os.Remove(path)
 	errorCheck(err)
 }
 

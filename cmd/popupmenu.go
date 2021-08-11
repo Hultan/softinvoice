@@ -16,24 +16,20 @@ func NewPopupMenu(softInvoice *SoftInvoice, mainWindow *MainForm) *PopupMenu {
 
 	menu.parent = mainWindow
 
-	popup, err := softInvoice.helper.GetMenu("popup_menu")
-	errorCheck(err)
+	popup := softInvoice.builder.GetObject("popup_menu").(*gtk.Menu)
 
-	preview, err := softInvoice.helper.GetMenuItem("popupMenuItemPreview")
-	errorCheck(err)
+	preview := softInvoice.builder.GetObject("popupMenuItemPreview").(*gtk.MenuItem)
 
-	pdf, err := softInvoice.helper.GetMenuItem("popupMenuItemSaveAsPDF")
-	errorCheck(err)
+	pdf := softInvoice.builder.GetObject("popupMenuItemSaveAsPDF").(*gtk.MenuItem)
 
-	_, err = mainWindow.treeView.Connect("button-release-event", func(treeview *gtk.TreeView, event *gdk.Event) {
+	_ = mainWindow.treeView.Connect("button-release-event", func(treeview *gtk.TreeView, event *gdk.Event) {
 		buttonEvent := gdk.EventButtonNewFromEvent(event)
 		if buttonEvent.Button() == 3 { // 3 == Mouse right button!?
 			popup.PopupAtPointer(event)
 		}
 	})
-	errorCheck(err)
 
-	_, err = preview.Connect("activate", func() {
+	_ = preview.Connect("activate", func() {
 		invoice := menu.getSelectedInvoice(mainWindow.treeView)
 		if invoice == nil {
 			return
@@ -41,9 +37,8 @@ func NewPopupMenu(softInvoice *SoftInvoice, mainWindow *MainForm) *PopupMenu {
 
 		softInvoice.previewWForm.OpenPreviewForm(softInvoice, invoice)
 	})
-	errorCheck(err)
 
-	_, err = pdf.Connect("activate", func() {
+	_ = pdf.Connect("activate", func() {
 		invoice := menu.getSelectedInvoice(mainWindow.treeView)
 		if invoice == nil {
 			return
@@ -61,7 +56,6 @@ func NewPopupMenu(softInvoice *SoftInvoice, mainWindow *MainForm) *PopupMenu {
 
 		dialog.Destroy()
 	})
-	errorCheck(err)
 
 	return menu
 }

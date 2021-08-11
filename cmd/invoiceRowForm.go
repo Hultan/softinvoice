@@ -38,8 +38,7 @@ func (i *InvoiceRowForm) OpenInvoiceRowForm(softInvoice *SoftInvoice, saveCallba
 	// Check if it is the first time we open the invoice row window
 	if softInvoice.invoiceRowForm.window == nil {
 		// Get the invoice window from glade
-		window, err := softInvoice.helper.GetWindow("invoicerow_window")
-		errorCheck(err)
+		window := softInvoice.builder.GetObject("invoicerow_window").(*gtk.Window)
 
 		// Save a pointer to the invoice window
 		softInvoice.invoiceRowForm.window = window
@@ -53,31 +52,26 @@ func (i *InvoiceRowForm) OpenInvoiceRowForm(softInvoice *SoftInvoice, saveCallba
 		window.SetTransientFor(softInvoice.invoiceForm.window)
 
 		// Hook up the hide event
-		_, err = window.Connect("hide", func() {
+		_ = window.Connect("hide", func() {
 			i.CloseInvoiceRowWindow()
 		})
-		errorCheck(err)
 
 		// Get the cancel button
-		cancelButton, err := softInvoice.helper.GetButton("productcancel_button")
-		errorCheck(err)
+		cancelButton := softInvoice.builder.GetObject("productcancel_button").(*gtk.Button)
 
 		// Hook up the clicked event for the cancel button
-		_, err = cancelButton.Connect("clicked", func() {
+		_ = cancelButton.Connect("clicked", func() {
 			window.Hide()
 		})
-		errorCheck(err)
 
 		// Get the save button
-		saveButton, err := softInvoice.helper.GetButton("productsave_button")
-		errorCheck(err)
+		saveButton := softInvoice.builder.GetObject("productsave_button").(*gtk.Button)
 
 		// Hook up the clicked event for the save button
-		_, err = saveButton.Connect("clicked", func() {
+		_ = saveButton.Connect("clicked", func() {
 			isSavingRow = true
 			window.Hide()
 		})
-		errorCheck(err)
 
 		// Setup window
 		i.SetupWindow(softInvoice)
@@ -106,40 +100,25 @@ func (i *InvoiceRowForm) CloseInvoiceRowWindow() {
 
 func (i *InvoiceRowForm) SetupWindow(softInvoice *SoftInvoice) {
 	// Get name entry
-	nameEntry, err := softInvoice.helper.GetEntry("productname_entry")
-	if err != nil {
-		fmt.Println("Failed to get name entry : ", err.Error())
-	}
+	nameEntry := softInvoice.builder.GetObject("productname_entry").(*gtk.Entry)
 	i.nameEntry = nameEntry
 
 	// Get text entry
-	textEntry, err := softInvoice.helper.GetEntry("producttext_entry")
-	if err != nil {
-		fmt.Println("Failed to get text entry : ", err.Error())
-	}
+	textEntry := softInvoice.builder.GetObject("producttext_entry").(*gtk.Entry)
 	i.textEntry = textEntry
 
 	// Get price entry
-	priceEntry, err := softInvoice.helper.GetEntry("productprice_entry")
-	if err != nil {
-		fmt.Println("Failed to get price entry : ", err.Error())
-	}
+	priceEntry := softInvoice.builder.GetObject("productprice_entry").(*gtk.Entry)
 	i.priceEntry = priceEntry
 
 	// Get amount entry
-	amountEntry, err := softInvoice.helper.GetEntry("productamount_entry")
-	if err != nil {
-		fmt.Println("Failed to get amount entry : ", err.Error())
-	}
+	amountEntry := softInvoice.builder.GetObject("productamount_entry").(*gtk.Entry)
 	i.amountEntry = amountEntry
 }
 
 func (i *InvoiceRowForm) SetupProductCombo(softInvoice *SoftInvoice) {
 	// Get product combo
-	productCombo, err := softInvoice.helper.GetComboBox("product_combo")
-	if err != nil {
-		fmt.Println("Failed to get product combobox : ", err.Error())
-	}
+	productCombo := softInvoice.builder.GetObject("product_combo").(*gtk.ComboBox)
 	i.productCombo = productCombo
 
 	// Get all products from the database
@@ -168,8 +147,7 @@ func (i *InvoiceRowForm) SetupProductCombo(softInvoice *SoftInvoice) {
 	productCombo.PackStart(nameRenderer, true)
 	productCombo.AddAttribute(nameRenderer, "text", 2)
 
-	_, err = productCombo.Connect("changed", i.OnProductChange)
-	errorCheck(err)
+	_ = productCombo.Connect("changed", i.OnProductChange)
 }
 
 //
@@ -180,7 +158,7 @@ func (i *InvoiceRowForm) OnProductChange(customerCombo *gtk.ComboBox) {
 	// Get the id of the selected product
 	iter, _ := customerCombo.GetActiveIter()
 	model, _ := customerCombo.GetModel()
-	idValue, _ := model.GetValue(iter, 0)
+	idValue, _ := model.(*gtk.TreeModel).GetValue(iter, 0)
 	id, _ := idValue.GoValue()
 
 	// Find the selected product
