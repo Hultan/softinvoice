@@ -25,7 +25,7 @@ type InvoiceForm struct {
 	invoiceNumberEntry *gtk.Entry
 	invoiceDateEntry   *gtk.Entry
 	calendar           *gtk.Calendar
-	invoiceRowTreeview    *gtk.TreeView
+	invoiceRowTreeview *gtk.TreeView
 	rowListStore       *gtk.ListStore
 
 	customer  database.Customer
@@ -192,7 +192,7 @@ func (i *InvoiceForm) SetupCustomerCombo(softInvoice *SoftInvoice) {
 	errorCheck(err)
 	for _, value := range customers {
 		iter = customerStore.Append()
-		if iter!=nil {
+		if iter != nil {
 			// Don't add customer on error
 			_ = customerStore.Set(iter, []int{0, 1, 2}, []interface{}{value.Id, value.Number, value.Name})
 		}
@@ -338,9 +338,9 @@ func (i *InvoiceForm) AddInvoiceRow(invoiceRow *database.InvoiceRow) {
 	_ = i.rowListStore.Set(iter, []int{0, 1, 2, 3, 4}, []interface{}{
 		invoiceRow.Text,
 		invoiceRow.Name,
-		strconv.FormatFloat(float64(invoiceRow.Price),'f',2,32),
-		strconv.FormatFloat(float64(invoiceRow.Amount),'f',2,32),
-		strconv.FormatFloat(float64(invoiceRow.Total),'f',2,32),
+		strconv.FormatFloat(float64(invoiceRow.Price), 'f', 2, 32),
+		strconv.FormatFloat(float64(invoiceRow.Amount), 'f', 2, 32),
+		strconv.FormatFloat(float64(invoiceRow.Total), 'f', 2, 32),
 	})
 
 	i.invoiceRowTreeview.SetModel(i.rowListStore)
