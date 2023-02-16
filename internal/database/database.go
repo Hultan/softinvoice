@@ -2,8 +2,10 @@ package database
 
 import (
 	"fmt"
-	"github.com/hultan/softteam/framework"
+
 	"github.com/jinzhu/gorm"
+
+	"github.com/hultan/softteam/framework"
 )
 
 type Database struct {
@@ -12,7 +14,7 @@ type Database struct {
 }
 
 func NewDatabase(useTestDatabase bool) *Database {
-	database:=new(Database)
+	database := new(Database)
 	database.UseTestDatabase = useTestDatabase
 	return database
 }
@@ -163,7 +165,7 @@ func (d *Database) GetNextInvoiceNumber() (int, error) {
 }
 
 func (d *Database) getDatabase() (*gorm.DB, error) {
-	databaseName:=d.GetDatabaseName()
+	databaseName := d.GetDatabaseName()
 	if d.db == nil {
 		fw := framework.NewFramework()
 		server, err := fw.IO.ReadAllText(credentialsPath)
